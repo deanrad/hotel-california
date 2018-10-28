@@ -15,7 +15,7 @@
     "storybook": "start-storybook -p 9009 -s public",
     "build-storybook": "build-storybook -s public"
   },
-  "proxy": "http://localhost:3120/",
+  "proxy": "http://localhost:8470/",
   "browserslist": [
     ">0.2%",
     "not dead",

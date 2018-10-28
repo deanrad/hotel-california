@@ -9,7 +9,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "client": "cd client && yarn start",
+    "client": "export PORT=3120; cd client && yarn start",
     "server": "nodemon server.js",
     "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
     "yarns": "yarn && cd client && yarn && cd -",
