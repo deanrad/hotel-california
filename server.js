@@ -3,7 +3,7 @@ const path = require("path");
 const morgan = require("morgan");
 
 const app = express();
-const port = process.env.PORT || 3120;
+const port = process.env.PORT || 8470;
 
 app.use(morgan("dev"));
 
@@ -22,4 +22,4 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-app.listen(port, () => console.log(`Listening on port ${port}`));
+app.listen(port, () => console.log(`Server listening on port ${port}`));
