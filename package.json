@@ -12,6 +12,8 @@
     "client": "cd client && yarn start",
     "server": "nodemon server.js",
     "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
+    "yarns": "yarn && cd client && yarn && cd -",
+    "storybook": "cd client && yarn storybook",
     "dev:server": "cd client && yarn build && cd .. && yarn start",
     "start": "node server.js",
     "heroku-postbuild": "cd client && npm install && npm install --only=dev --no-shrinkwrap && npm run build"
@@ -20,7 +22,8 @@
     "express": "^4.16.3"
   },
   "devDependencies": {
-    "concurrently": "^4.0.1"
+    "concurrently": "^4.0.1",
+    "morgan": "^1.9.1"
   },
   "repository": {
     "type": "git",
