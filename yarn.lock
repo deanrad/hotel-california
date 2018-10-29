@@ -296,6 +296,32 @@ fresh@0.5.2:
   resolved "https://registry.yarnpkg.com/fresh/-/fresh-0.5.2.tgz#3d8cadd90d976569fa835ab1f8e4b23a105605a7"
   integrity sha1-PYyt2Q2XZWn6g1qx+OSyOhBWBac=
 
+frint-component-handlers@^5.7.2:
+  version "5.7.2"
+  resolved "https://registry.yarnpkg.com/frint-component-handlers/-/frint-component-handlers-5.7.2.tgz#db3be4a5fe714a7a2f08957bd3f26715d3435543"
+  integrity sha512-jjA/kvv2g95DW6xuM+0Ig4bEe+51a0GODVnjNMXfR9vBpvtFhKAW4tj6f8V3OnGP9wLnbLUZHLINeLhos0t1OA==
+  dependencies:
+    lodash "^4.13.1"
+    rxjs "^5.5.0"
+
+frint-component-utils@^5.7.2:
+  version "5.7.2"
+  resolved "https://registry.yarnpkg.com/frint-component-utils/-/frint-component-utils-5.7.2.tgz#07631eca006fca47044afc30b16ddac10a360762"
+  integrity sha512-JXw7DHFz1ICioTPn53RXANKg7IlU8C8KTPHUQwYFFce8Kh/9Xh8RjAo6q16D3ywBF9kxTVLWOsswK3hGylIKMw==
+  dependencies:
+    lodash "^4.13.1"
+    rxjs "^5.5.0"
+
+frint-react@^5.7.2:
+  version "5.7.2"
+  resolved "https://registry.yarnpkg.com/frint-react/-/frint-react-5.7.2.tgz#b2c52e1024bbd372b4453e20d7019a82c49a1dd3"
+  integrity sha512-U4W0/9eXgVlUM7PSP0XTQfbhFuER506ssDp2O1tp6GrOexZW4r6uDWqUnP64MO9cCtaEVhPafQ7FbrksU2Kf7Q==
+  dependencies:
+    frint-component-handlers "^5.7.2"
+    frint-component-utils "^5.7.2"
+    lodash "^4.13.1"
+    rxjs "^5.5.0"
+
 get-caller-file@^1.0.1:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/get-caller-file/-/get-caller-file-1.0.3.tgz#f978fa4c90d1dfe7ff2d6beda2a515e713bdcf4a"
@@ -405,7 +431,7 @@ locate-path@^3.0.0:
     p-locate "^3.0.0"
     path-exists "^3.0.0"
 
-lodash@^4.17.10:
+lodash@^4.13.1, lodash@^4.17.10:
   version "4.17.11"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
   integrity sha512-cQKh8igo5QUhZ7lg38DYWAxMvjSAKG0A8wGSVimP07SIUEK2UO+arSRKbRZWtelMtN5V0Hkwh5ryOto/SshYIg==
@@ -653,6 +679,13 @@ rxjs@6.2.2:
   dependencies:
     tslib "^1.9.0"
 
+rxjs@^5.5.0:
+  version "5.5.12"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.5.12.tgz#6fa61b8a77c3d793dbaf270bee2f43f652d741cc"
+  integrity sha512-xx2itnL5sBbqeeiVgNPVuQQ1nC8Jp2WfNJhXWHmElW9YmrpS9UVnNzhP3EH3HFqexO5Tlp8GhYY+WEcqcVMvGw==
+  dependencies:
+    symbol-observable "1.0.1"
+
 safe-buffer@5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.1.tgz#893312af69b2123def71f57889001671eeb2c853"
@@ -819,6 +852,11 @@ supports-color@^5.3.0:
   integrity sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==
   dependencies:
     has-flag "^3.0.0"
+
+symbol-observable@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.0.1.tgz#8340fc4702c3122df5d22288f88283f513d3fdd4"
+  integrity sha1-g0D8RwLDEi310iKI+IKD9RPT/dQ=
 
 tree-kill@^1.1.0:
   version "1.2.0"

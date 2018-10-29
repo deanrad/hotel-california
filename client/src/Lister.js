@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { interval } from "rxjs";
-import { scan, take } from "rxjs/operators";
+import { scan, take, map } from "rxjs/operators";
+import { observe } from "frint-react";
 
 function useObservable(o) {
   const [list, setList] = useState([]);
@@ -18,7 +19,8 @@ function useObservable(o) {
   return list;
 }
 
-// return a new Observable
+// return a new Observable not returning props,
+// just the list itself
 function getO() {
   return interval(1000).pipe(
     take(5),
@@ -27,10 +29,9 @@ function getO() {
     }, [])
   );
 }
-
 const o = getO();
-export default () => {
-  const list = useObservable(o);
+
+const Lister = ({ list }) => {
   return (
     <ol>
       {list.map((i, idx) => (
@@ -39,3 +40,7 @@ export default () => {
     </ol>
   );
 };
+
+export default observe(() => {
+  return o.pipe(map(list => ({ list })));
+})(Lister);
