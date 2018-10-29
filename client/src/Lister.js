@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { interval } from "rxjs";
 import { scan, take, map } from "rxjs/operators";
-import { observe } from "frint-react";
 
 function useObservable(o) {
   const [list, setList] = useState([]);
