@@ -20,7 +20,8 @@
   },
   "dependencies": {
     "express": "^4.16.3",
-    "frint-react": "^5.7.2"
+    "frint-react": "^5.7.2",
+    "prop-types": "^15.6.2"
   },
   "devDependencies": {
     "concurrently": "^4.0.1",
