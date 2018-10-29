@@ -5544,6 +5544,32 @@ fresh@0.5.2:
   resolved "https://registry.yarnpkg.com/fresh/-/fresh-0.5.2.tgz#3d8cadd90d976569fa835ab1f8e4b23a105605a7"
   integrity sha1-PYyt2Q2XZWn6g1qx+OSyOhBWBac=
 
+frint-component-handlers@^5.7.2:
+  version "5.7.2"
+  resolved "https://registry.yarnpkg.com/frint-component-handlers/-/frint-component-handlers-5.7.2.tgz#db3be4a5fe714a7a2f08957bd3f26715d3435543"
+  integrity sha512-jjA/kvv2g95DW6xuM+0Ig4bEe+51a0GODVnjNMXfR9vBpvtFhKAW4tj6f8V3OnGP9wLnbLUZHLINeLhos0t1OA==
+  dependencies:
+    lodash "^4.13.1"
+    rxjs "^5.5.0"
+
+frint-component-utils@^5.7.2:
+  version "5.7.2"
+  resolved "https://registry.yarnpkg.com/frint-component-utils/-/frint-component-utils-5.7.2.tgz#07631eca006fca47044afc30b16ddac10a360762"
+  integrity sha512-JXw7DHFz1ICioTPn53RXANKg7IlU8C8KTPHUQwYFFce8Kh/9Xh8RjAo6q16D3ywBF9kxTVLWOsswK3hGylIKMw==
+  dependencies:
+    lodash "^4.13.1"
+    rxjs "^5.5.0"
+
+frint-react@^5.7.2:
+  version "5.7.2"
+  resolved "https://registry.yarnpkg.com/frint-react/-/frint-react-5.7.2.tgz#b2c52e1024bbd372b4453e20d7019a82c49a1dd3"
+  integrity sha512-U4W0/9eXgVlUM7PSP0XTQfbhFuER506ssDp2O1tp6GrOexZW4r6uDWqUnP64MO9cCtaEVhPafQ7FbrksU2Kf7Q==
+  dependencies:
+    frint-component-handlers "^5.7.2"
+    frint-component-utils "^5.7.2"
+    lodash "^4.13.1"
+    rxjs "^5.5.0"
+
 from2@^2.1.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/from2/-/from2-2.3.0.tgz#8bfb5502bde4a4d36cfdeea007fcca21d7e382af"
@@ -10904,6 +10930,13 @@ rx-lite@*, rx-lite@^4.0.8:
   resolved "https://registry.yarnpkg.com/rx-lite/-/rx-lite-4.0.8.tgz#0b1e11af8bc44836f04a6407e92da42467b79444"
   integrity sha1-Cx4Rr4vESDbwSmQH6S2kJGe3lEQ=
 
+rxjs@^5.5.0:
+  version "5.5.12"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.5.12.tgz#6fa61b8a77c3d793dbaf270bee2f43f652d741cc"
+  integrity sha512-xx2itnL5sBbqeeiVgNPVuQQ1nC8Jp2WfNJhXWHmElW9YmrpS9UVnNzhP3EH3HFqexO5Tlp8GhYY+WEcqcVMvGw==
+  dependencies:
+    symbol-observable "1.0.1"
+
 rxjs@^6.1.0, rxjs@^6.3.3:
   version "6.3.3"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.3.3.tgz#3c6a7fa420e844a81390fb1158a9ec614f4bad55"
@@ -11721,6 +11754,11 @@ svgo@^1.0.0, svgo@^1.0.5:
     stable "~0.1.6"
     unquote "~1.1.1"
     util.promisify "~1.0.0"
+
+symbol-observable@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.0.1.tgz#8340fc4702c3122df5d22288f88283f513d3fdd4"
+  integrity sha1-g0D8RwLDEi310iKI+IKD9RPT/dQ=
 
 symbol-observable@^1.0.3:
   version "1.2.0"

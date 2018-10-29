@@ -31,7 +31,7 @@ function getO() {
 }
 const o = getO();
 
-const Lister = ({ list }) => {
+const Lister = ({ list = [] }) => {
   return (
     <ol>
       {list.map((i, idx) => (
@@ -41,6 +41,6 @@ const Lister = ({ list }) => {
   );
 };
 
-export default observe(() => {
+export default observe(app => {
   return o.pipe(map(list => ({ list })));
 })(Lister);

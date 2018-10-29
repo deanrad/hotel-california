@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "license": "MIT",
   "dependencies": {
+    "frint-react": "^5.7.2",
     "react": "^16.7.0-alpha",
     "react-dom": "^16.7.0-alpha",
     "react-scripts": "2.0.2",
