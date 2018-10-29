@@ -5,16 +5,7 @@ import { scan, take, map } from "rxjs/operators";
 function useObservable(o) {
   const [list, setList] = useState([]);
 
-  useEffect(() => {
-    const sub = o.subscribe(next => setList(next));
-
-    return () => {
-      // if we unsubscribe, we get only zero,
-      // but if we don't we get weird flicker :(
-      sub.unsubscribe();
-    };
-  });
-
+  const sub = o.subscribe(next => setList(next));
   return list;
 }
 
@@ -30,7 +21,9 @@ function getO() {
 }
 const o = getO();
 
-const Lister = ({ list }) => {
+const Lister = () => {
+  const list = useObservable(o);
+
   return (
     <ol>
       {list.map((i, idx) => (
@@ -40,6 +33,4 @@ const Lister = ({ list }) => {
   );
 };
 
-export default observe(() => {
-  return o.pipe(map(list => ({ list })));
-})(Lister);
+export default Lister;
