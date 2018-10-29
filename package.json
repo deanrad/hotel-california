@@ -15,7 +15,7 @@
     "yarns": "yarn && cd client && yarn && cd -",
     "storybook": "cd client && yarn storybook",
     "dev:server": "cd client && yarn build && cd .. && yarn start",
-    "start": "node server.js",
+    "start": "yarn dev",
     "heroku-postbuild": "cd client && npm install && npm install --only=dev --no-shrinkwrap && npm run build"
   },
   "dependencies": {

@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import logo from "./logo.svg";
 
 import "./App.css";
+import Lister from "./Lister";
 
 class App extends Component {
   state = {
@@ -32,6 +33,7 @@ class App extends Component {
           <h1 className="App-title">Welcome to The Hotel California</h1>
         </header>
         <p className="App-intro">{this.state.response}</p>
+        <Lister />
       </div>
     );
   }
