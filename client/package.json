@@ -5,7 +5,10 @@
   "dependencies": {
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
-    "react-scripts": "2.0.2"
+    "react-redux": "^5.1.0",
+    "react-scripts": "2.0.2",
+    "redux": "^4.0.1",
+    "reselect": "^4.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -23,8 +26,8 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "@storybook/react": "^3.4.11",
     "@storybook/addon-actions": "^3.4.11",
-    "@storybook/addon-links": "^3.4.11"
+    "@storybook/addon-links": "^3.4.11",
+    "@storybook/react": "^3.4.11"
   }
 }
