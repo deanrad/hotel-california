@@ -6,6 +6,7 @@ import { linkTo } from "@storybook/addon-links";
 
 import { Button, Welcome } from "@storybook/react/demo";
 import RoomView from "../RoomView";
+import Select from "../routes/Select";
 
 storiesOf("Welcome", module).add("to the Hotel California !!", () => (
   <div>
@@ -15,30 +16,16 @@ storiesOf("Welcome", module).add("to the Hotel California !!", () => (
 ));
 
 storiesOf("Routes", module)
-  .add("/select", () => (
-    <div>
-      <h2>Welcome to the Hotel California</h2>
-      <h3>Pick a room:</h3>
-      <div class="row">
-        <RoomView num="20" occupancy="open" />
-        <RoomView num="21" occupancy="hold mine" />
-      </div>
-      <div class="row">
-        <RoomView num="10" occupancy="hold" />
-        <RoomView num="11" occupancy="full" />
-      </div>
-      <h4>
-        Key:
-        <p>
-          <span class="legend open">Open</span>
-          <span class="legend hold">On Hold</span>
-          <span class="legend hold mine">Your Hold</span>
-          <span class="legend full">Not Avail</span>
-        </p>
-      </h4>
-    </div>
+  .add("/select", () => <Select />)
+  .add("/reserve/30 - Error", () => <RoomView num="10" occupancy="open" />)
+  .add("/reserve/20 - Ok", () => <RoomView num="10" occupancy="open" />)
+  .add("/reserve/20/submit", () => <RoomView num="10" occupancy="open" />)
+  .add("/reserve/20/submit/success", () => (
+    <RoomView num="10" occupancy="open" />
   ))
-  .add("/reserve", () => <RoomView num="10" occupancy="open" />);
+  .add("/reserve/20/submit/error", () => (
+    <RoomView num="10" occupancy="open" />
+  ));
 
 storiesOf("RoomView", module)
   .add("open", () => <RoomView num="10" occupancy="open" />)
