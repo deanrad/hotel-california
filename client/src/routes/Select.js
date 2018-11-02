@@ -4,7 +4,7 @@ import { createStore } from "redux";
 import { connect } from "react-redux";
 export const initialState = {
   roomViews: [
-    { num: "35", occupancy: "hold" },
+    { num: "30", occupancy: "hold" },
     { num: "31", occupancy: "hold" },
     { num: "20", occupancy: "open" },
     { num: "21", occupancy: "full" },
@@ -25,27 +25,28 @@ export const mapStateToProps = state => {
   return { floors };
 };
 
+const Floor = ({ children: rooms }) => (
+  <div className="floor">
+    {rooms.map(room => (
+      <RoomView key={room.num} {...room} />
+    ))}
+  </div>
+);
 const Select = ({ floors }) => {
   return (
     <div>
       <h2>Welcome to the Hotel California</h2>
       <h3>Pick a room:</h3>
-      {floors.map(floor => (
-        <div class="floor">
-          {floor.map(room => (
-            <RoomView {...room} />
-          ))}
-        </div>
+      {floors.map((floor, idx) => (
+        <Floor key={idx}>{floor}</Floor>
       ))}
-      <h4>
+      <p>
         Key:
-        <p>
-          <span class="legend open">Open</span>
-          <span class="legend hold">On Hold</span>
-          <span class="legend hold mine">Your Hold</span>
-          <span class="legend full">Not Avail</span>
-        </p>
-      </h4>
+        <span className="legend open">Open</span>
+        <span className="legend hold">On Hold</span>
+        <span className="legend hold mine">Your Hold</span>
+        <span className="legend full">Not Avail</span>
+      </p>
     </div>
   );
 };

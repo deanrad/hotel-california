@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "concurrently": "^4.0.1",
+    "jsx-html-class": "^1.0.3",
     "morgan": "^1.9.1"
   },
   "repository": {

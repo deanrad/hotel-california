@@ -390,6 +390,11 @@ json-parse-better-errors@^1.0.1:
   resolved "https://registry.yarnpkg.com/json-parse-better-errors/-/json-parse-better-errors-1.0.2.tgz#bb867cfb3450e69107c131d1c514bab3dc8bcaa9"
   integrity sha512-mrqyZKfX5EhL7hvqcV6WG1yYjnjeuYDzDhhcAAUrq8Po85NBQBJP+ZDUT75qZQ98IkUoBqdkExkukOU7Ts2wrw==
 
+jsx-html-class@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/jsx-html-class/-/jsx-html-class-1.0.3.tgz#efd7cc7c523d3ccc5247f6b1ce53ef9566f7cffa"
+  integrity sha1-79fMfFI9PMxSR/axzlPvlWb3z/o=
+
 lcid@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/lcid/-/lcid-2.0.0.tgz#6ef5d2df60e52f82eb228a4c373e8d1f397253cf"
