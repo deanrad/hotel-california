@@ -1,8 +1,20 @@
 import React, { Component } from "react";
+import io from "socket.io-client";
 
 import "./App.css";
 import Select from "./routes/Select";
 import { store } from "./store";
+import { ajaxStreamingGet } from "antares-protocol";
+
+const url =
+  process.env.NODE_ENV === "production"
+    ? document.location.href.replace(/\/\w+$/, "") // get rid of path
+    : "http://localhost:8470";
+
+const socket = io(url);
+socket.on("hello", () => {
+  store.dispatch({ type: "socket.connect" });
+});
 
 class App extends Component {
   componentDidMount() {
@@ -12,11 +24,9 @@ class App extends Component {
       })
       .catch(err => console.log(err));
 
-    this.callApi("/api/occupancy").then(occupancy =>
-      occupancy.forEach(o =>
-        store.dispatch({ type: "setOccupancy", payload: o })
-      )
-    );
+    ajaxStreamingGet({
+      url: "/api/occupancy"
+    }).subscribe(occ => store.dispatch({ type: "setOccupancy", payload: occ }));
   }
 
   callApi = async url => {

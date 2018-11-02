@@ -26,8 +26,10 @@ const reducer = (state = { room: [], occupancy: [] }, action) => {
         occupancy: state.occupancy
       };
     case "setOccupancy":
-      const newOcc = Array.from(state.occupancy);
-      newOcc.push(action.payload);
+      const occ = action.payload;
+      const newOcc = Object.assign({}, state.occupancy);
+      newOcc[occ.num] = occ.occupancy;
+
       return {
         room: state.room,
         occupancy: newOcc

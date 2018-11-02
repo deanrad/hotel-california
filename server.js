@@ -2,8 +2,13 @@ const express = require("express");
 const path = require("path");
 const morgan = require("morgan");
 const app = express();
+const http = require("http").Server(app);
 const port = process.env.PORT || 8470;
-
+const io = require("socket.io").listen(http);
+io.on("connection", client => {
+  console.log("Got a client connection!");
+  client.emit("hello", "socket");
+});
 app.use(morgan("dev"));
 
 // API calls
@@ -28,12 +33,12 @@ app.get("/api/rooms", (req, res) => {
 
 app.get("/api/occupancy", (req, res) => {
   res.send([
-    { num: "30", occupancy: "hold" },
-    { num: "31", occupancy: "hold" },
+    { num: "10", occupancy: "full" },
+    { num: "11", occupancy: "open" },
     { num: "20", occupancy: "open" },
     { num: "21", occupancy: "full" },
-    { num: "10", occupancy: "full" },
-    { num: "11", occupancy: "open" }
+    { num: "30", occupancy: "hold" },
+    { num: "31", occupancy: "hold" }
   ]);
 });
 
@@ -47,4 +52,4 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-app.listen(port, () => console.log(`Server listening on port ${port}`));
+http.listen(port, () => console.log(`Server listening on port ${port}`));

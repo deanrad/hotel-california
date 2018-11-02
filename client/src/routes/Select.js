@@ -13,13 +13,10 @@ export const chunkIntoFloors = roomViews => {
 // Formats for the UI component
 export const createRoomViews = state => {
   const { room, occupancy } = state;
-  return room.map(room => {
-    const occ = occupancy.find(o => o.num === room.num);
-    return {
-      ...room,
-      occupancy: occ ? occ.occupancy : "open"
-    };
-  });
+  return room.map(room => ({
+    ...room,
+    occupancy: occupancy[room.num] || "open"
+  }));
 };
 
 export const mapStateToProps = state => {
