@@ -11,6 +11,12 @@ class App extends Component {
         store.dispatch({ type: "loadRooms", payload: objects });
       })
       .catch(err => console.log(err));
+
+    this.callApi("/api/occupancy").then(occupancy =>
+      occupancy.forEach(o =>
+        store.dispatch({ type: "setOccupancy", payload: o })
+      )
+    );
   }
 
   callApi = async url => {

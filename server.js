@@ -1,7 +1,6 @@
 const express = require("express");
 const path = require("path");
 const morgan = require("morgan");
-const { initialState } = require("./client/src/store");
 const app = express();
 const port = process.env.PORT || 8470;
 
@@ -13,10 +12,29 @@ app.get("/api/hello", (req, res) => {
 });
 
 app.get("/api/rooms", (req, res) => {
+  const rooms = [
+    { num: "30" },
+    { num: "31" },
+    { num: "20" },
+    { num: "21" },
+    { num: "10" },
+    { num: "11" }
+  ];
   res.send({
-    count: initialState.roomViews.length,
-    objects: initialState.roomViews
+    count: rooms.length,
+    objects: rooms
   });
+});
+
+app.get("/api/occupancy", (req, res) => {
+  res.send([
+    { num: "30", occupancy: "hold" },
+    { num: "31", occupancy: "hold" },
+    { num: "20", occupancy: "open" },
+    { num: "21", occupancy: "full" },
+    { num: "10", occupancy: "full" },
+    { num: "11", occupancy: "open" }
+  ]);
 });
 
 if (process.env.NODE_ENV === "production") {

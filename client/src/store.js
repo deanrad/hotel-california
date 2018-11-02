@@ -1,6 +1,14 @@
 const { createStore } = require("redux");
 const initialState = {
-  roomViews: [
+  room: [
+    { num: "30" },
+    { num: "31" },
+    { num: "20" },
+    { num: "21" },
+    { num: "10" },
+    { num: "11" }
+  ],
+  occupancy: [
     { num: "30", occupancy: "hold" },
     { num: "31", occupancy: "hold" },
     { num: "20", occupancy: "open" },
@@ -10,11 +18,19 @@ const initialState = {
   ]
 };
 
-const reducer = (state = initialState, action) => {
+const reducer = (state = { room: [], occupancy: [] }, action) => {
   switch (action.type) {
     case "loadRooms":
       return {
-        roomViews: action.payload
+        room: action.payload,
+        occupancy: state.occupancy
+      };
+    case "setOccupancy":
+      const newOcc = Array.from(state.occupancy);
+      newOcc.push(action.payload);
+      return {
+        room: state.room,
+        occupancy: newOcc
       };
     default:
       return state;
