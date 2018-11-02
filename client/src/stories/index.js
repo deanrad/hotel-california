@@ -6,8 +6,34 @@ import { linkTo } from "@storybook/addon-links";
 
 import { Button, Welcome } from "@storybook/react/demo";
 import RoomView from "../RoomView";
-import Select, { store } from "../routes/Select";
+import Select from "../routes/Select";
 import Reserve from "../routes/Reserve";
+
+import { createStore } from "redux";
+const initialState = {
+  room: [
+    { num: "30" },
+    { num: "31" },
+    { num: "20" },
+    { num: "21" },
+    { num: "10" },
+    { num: "11" }
+  ],
+  occupancy: {
+    "30": "hold",
+    "31": "hold",
+    "20": "open",
+    "21": "full",
+    "10": "full",
+    "11": "open"
+  }
+};
+const store = createStore(
+  (s = initialState) => s,
+  typeof window !== "undefined" &&
+    window.__REDUX_DEVTOOLS_EXTENSION__ &&
+    window.__REDUX_DEVTOOLS_EXTENSION__()
+);
 
 storiesOf("Welcome", module).add("to the Hotel California !!", () => (
   <div>

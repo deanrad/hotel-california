@@ -29,10 +29,24 @@ const Reserve = ({ roomViews, roomChoice, payment, loyalty }) => [
     </div>
   </div>
 ];
-export default connect(({ roomViews, ...rest }) => ({
-  ...rest,
-  roomViews: roomViews.map(
-    roomView =>
-      roomView.num === "20" ? { ...roomView, occupancy: "hold mine" } : roomView
-  )
-}))(Reserve);
+
+// Formats for the UI component
+export const createRoomViews = state => {
+  const { room, occupancy } = state;
+  return room.map(room => ({
+    ...room,
+    occupancy: occupancy[room.num] || "open"
+  }));
+};
+
+export default connect((state, props) => {
+  const roomViews = createRoomViews(state);
+  return {
+    roomViews: roomViews.map(
+      roomView =>
+        roomView.num === props.roomChoice
+          ? { ...roomView, occupancy: "hold mine" }
+          : roomView
+    )
+  };
+})(Reserve);

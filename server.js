@@ -1,16 +1,37 @@
 const express = require("express");
 const path = require("path");
 const morgan = require("morgan");
+const { interval } = require("rxjs");
+const { map } = require("rxjs/operators");
 const app = express();
 const http = require("http").Server(app);
 const port = process.env.PORT || 8470;
+
 const io = require("socket.io").listen(http);
 io.on("connection", client => {
   console.log("Got a client connection!");
-  client.emit("hello", "socket");
+  interval(5000)
+    .pipe(
+      map(i => i % 2 === 1),
+      map(hold => ({
+        type: "setOccupancy",
+        payload: {
+          num: "30",
+          occupancy: hold ? "hold" : "open"
+        }
+      }))
+    )
+    .subscribe(sendActionToClient(client));
 });
+
 app.use(morgan("dev"));
 
+function sendActionToClient(client) {
+  return action => {
+    console.log("Sending: " + JSON.stringify(action));
+    client.emit("action", action);
+  };
+}
 // API calls
 app.get("/api/hello", (req, res) => {
   res.send({ express: "Hello From The Server." });

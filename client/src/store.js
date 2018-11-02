@@ -1,51 +1,34 @@
 const { createStore } = require("redux");
 const initialState = {
-  room: [
-    { num: "30" },
-    { num: "31" },
-    { num: "20" },
-    { num: "21" },
-    { num: "10" },
-    { num: "11" }
-  ],
-  occupancy: [
-    { num: "30", occupancy: "hold" },
-    { num: "31", occupancy: "hold" },
-    { num: "20", occupancy: "open" },
-    { num: "21", occupancy: "full" },
-    { num: "10", occupancy: "full" },
-    { num: "11", occupancy: "open" }
-  ]
+  room: [],
+  occupancy: []
 };
-
-const reducer = (state = { room: [], occupancy: [] }, action) => {
+const reducer = (state = initialState, action) => {
   switch (action.type) {
+    // get all rooms at once, Promise-style
     case "loadRooms":
       return {
-        room: action.payload,
-        occupancy: state.occupancy
+        ...state,
+        room: action.payload
       };
+    // get a single {num, occupancy} payload, where num is the key
     case "setOccupancy":
-      const occ = action.payload;
-      const newOcc = Object.assign({}, state.occupancy);
-      newOcc[occ.num] = occ.occupancy;
-
+      const { occupancy, num } = action.payload;
       return {
-        room: state.room,
-        occupancy: newOcc
+        ...state,
+        occupancy: {
+          ...state.occupancy,
+          [num]: occupancy
+        }
       };
     default:
       return state;
   }
 };
 
-const store = createStore(
+export const store = createStore(
   reducer,
   typeof window !== "undefined" &&
     window.__REDUX_DEVTOOLS_EXTENSION__ &&
     window.__REDUX_DEVTOOLS_EXTENSION__()
 );
-module.exports = {
-  initialState,
-  store
-};

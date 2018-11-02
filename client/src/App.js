@@ -4,7 +4,10 @@ import io from "socket.io-client";
 import "./App.css";
 import Select from "./routes/Select";
 import { store } from "./store";
-import { ajaxStreamingGet } from "antares-protocol";
+import { ajaxStreamingGet, Agent } from "antares-protocol";
+
+const agent = new Agent();
+agent.addFilter(({ action }) => store.dispatch(action));
 
 const url =
   process.env.NODE_ENV === "production"
@@ -13,20 +16,22 @@ const url =
 
 const socket = io(url);
 socket.on("hello", () => {
-  store.dispatch({ type: "socket.connect" });
+  agent.process({ type: "socket.connect" });
 });
-
+socket.on("action", action => {
+  agent.process({ type: "setOccupancy", payload: action.payload })
+});
 class App extends Component {
   componentDidMount() {
     this.callApi("/api/rooms")
       .then(({ objects }) => {
-        store.dispatch({ type: "loadRooms", payload: objects });
+        agent.process({ type: "loadRooms", payload: objects });
       })
       .catch(err => console.log(err));
 
     ajaxStreamingGet({
       url: "/api/occupancy"
-    }).subscribe(occ => store.dispatch({ type: "setOccupancy", payload: occ }));
+    }).subscribe(occ => agent.process({ type: "setOccupancy", payload: occ }));
   }
 
   callApi = async url => {
