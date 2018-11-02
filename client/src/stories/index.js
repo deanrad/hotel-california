@@ -7,6 +7,7 @@ import { linkTo } from "@storybook/addon-links";
 import { Button, Welcome } from "@storybook/react/demo";
 import RoomView from "../RoomView";
 import Select, { store } from "../routes/Select";
+import Reserve from "../routes/Reserve";
 
 storiesOf("Welcome", module).add("to the Hotel California !!", () => (
   <div>
@@ -17,8 +18,8 @@ storiesOf("Welcome", module).add("to the Hotel California !!", () => (
 
 storiesOf("Routes", module)
   .add("/select", () => <Select store={store} />)
+  .add("/reserve/20 - Ok", () => <Reserve store={store} roomChoice="20" />)
   .add("/reserve/30 - Error", () => <RoomView num="10" occupancy="open" />)
-  .add("/reserve/20 - Ok", () => <RoomView num="10" occupancy="open" />)
   .add("/reserve/20/submit", () => <RoomView num="10" occupancy="open" />)
   .add("/reserve/20/submit/success", () => (
     <RoomView num="10" occupancy="open" />

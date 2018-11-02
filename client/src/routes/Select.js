@@ -1,34 +1,26 @@
 import React from "react";
 import RoomView from "../RoomView";
-import { createStore } from "redux";
 import { connect } from "react-redux";
-export const initialState = {
-  roomViews: [
-    { num: "30", occupancy: "hold" },
-    { num: "31", occupancy: "hold" },
-    { num: "20", occupancy: "open" },
-    { num: "21", occupancy: "full" },
-    { num: "10", occupancy: "full" },
-    { num: "11", occupancy: "open" }
-  ]
-};
 
-export const store = createStore((state = initialState, action) => state);
-
-// Formats for the UI component
-export const mapStateToProps = state => {
-  const { roomViews } = state;
+export const chunkIntoFloors = roomViews => {
   const floors = [];
   for (let i = 0; i < roomViews.length; i += 2) {
     floors.push([roomViews[i], roomViews[i + 1]]);
   }
+  return floors;
+};
+
+// Formats for the UI component
+export const mapStateToProps = state => {
+  const { roomViews } = state;
+  const floors = chunkIntoFloors(roomViews);
   return { floors };
 };
 
-const Floor = ({ children: rooms }) => (
+export const Floor = ({ mini, children: rooms }) => (
   <div className="floor">
     {rooms.map(room => (
-      <RoomView key={room.num} {...room} />
+      <RoomView key={room.num} {...{ ...room, mini }} />
     ))}
   </div>
 );

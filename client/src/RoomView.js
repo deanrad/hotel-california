@@ -1,11 +1,13 @@
-import React, { Component } from "react";
+import React from "react";
 
 import "./RoomView.css";
 
-export default ({ num, occupancy }) => {
+const RoomView = ({ num, occupancy, mini }) => {
   return (
-    <div className={["room", occupancy].join(" ")}>
+    <div className={["room", occupancy, mini && "sm"].join(" ")}>
       <span className="number">{num}</span>
     </div>
   );
 };
+
+export default RoomView;
