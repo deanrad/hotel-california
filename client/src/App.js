@@ -19,7 +19,7 @@ const socket = io(url);
 socket.on("hello", () => {
   agent.process({ type: "socket.connect" });
 });
-const allOccupancyLiveUpdates = () => {
+const liveOccupancyPayloads = () => {
   return new Observable(notify => {
     socket.on("setOccupancy", payload => notify.next(payload));
   });
@@ -37,8 +37,8 @@ class App extends Component {
       ajaxStreamingGet({
         url: "/api/occupancy"
       }),
-      allOccupancyLiveUpdates()
-    ).subscribe(occ => agent.process({ type: "setOccupancy", payload: occ }));
+      liveOccupancyPayloads()
+    ).subscribe(payload => agent.process({ type: "setOccupancy", payload }));
   }
 
   callApi = async url => {

@@ -35,12 +35,14 @@ export const Floor = ({ mini, children: rooms }) => (
 const Select = ({ floors }) => {
   return (
     <div>
-      <h2>Welcome to the Hotel California</h2>
+      <h2>Welcome to the Hotel California !</h2>
       <h3>Pick a room:</h3>
-      {floors.map((floor, idx) => (
-        <Floor key={idx}>{floor}</Floor>
-      ))}
-      <p>
+      <div className="hotel">
+        {floors.map((floor, idx) => (
+          <Floor key={idx}>{floor}</Floor>
+        ))}
+      </div>
+      <p style={{ position: "fixed", right: 0, top: 0, margin: 20 }}>
         Key:
         <span className="legend open">Open</span>
         <span className="legend hold">On Hold</span>

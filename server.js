@@ -2,36 +2,13 @@ const express = require("express");
 const path = require("path");
 const morgan = require("morgan");
 const { interval } = require("rxjs");
-const { map } = require("rxjs/operators");
+const { map, share } = require("rxjs/operators");
 const app = express();
 const http = require("http").Server(app);
 const port = process.env.PORT || 8470;
 
-const io = require("socket.io").listen(http);
-io.on("connection", client => {
-  console.log("Got a client connection!");
-  interval(5000)
-    .pipe(
-      map(i => i % 2 === 1),
-      map(hold => ({
-        type: "setOccupancy",
-        payload: {
-          num: "30",
-          occupancy: hold ? "hold" : "open"
-        }
-      }))
-    )
-    .subscribe(sendActionToClient(client));
-});
-
 app.use(morgan("dev"));
 
-function sendActionToClient(client) {
-  return action => {
-    console.log("Sending: " + JSON.stringify(action));
-    client.emit(action.type, action.payload);
-  };
-}
 // API calls
 app.get("/api/hello", (req, res) => {
   res.send({ express: "Hello From The Server." });
@@ -74,3 +51,30 @@ if (process.env.NODE_ENV === "production") {
 }
 
 http.listen(port, () => console.log(`Server listening on port ${port}`));
+
+// WebSocket stuff follows
+const io = require("socket.io").listen(http);
+io.on("connection", client => {
+  console.log("Got a client connection!");
+
+  // Create an Observable, and subscribe to it
+  simulatedOccupancyChanges.subscribe(action => {
+    console.log("Sending: " + JSON.stringify(action));
+    client.emit(action.type, action.payload);
+  });
+
+  client.on("disconnect", () => console.log("Client disconnected"));
+});
+
+// This should be subscribed once per
+var simulatedOccupancyChanges = interval(5000).pipe(
+  map(i => i % 2 === 1),
+  map(hold => ({
+    type: "setOccupancy",
+    payload: {
+      num: "20",
+      occupancy: hold ? "hold" : "open"
+    }
+  })),
+  share()
+);
