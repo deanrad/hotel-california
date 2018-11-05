@@ -29,7 +29,7 @@ app.use(morgan("dev"));
 function sendActionToClient(client) {
   return action => {
     console.log("Sending: " + JSON.stringify(action));
-    client.emit("action", action);
+    client.emit(action.type, action.payload);
   };
 }
 // API calls
