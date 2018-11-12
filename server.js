@@ -2,7 +2,7 @@ const express = require("express");
 const path = require("path");
 const morgan = require("morgan");
 
-const { interval } = require("rxjs");
+const { interval, merge, from } = require("rxjs");
 const { map, tap, share } = require("rxjs/operators");
 const app = express();
 const http = require("http").Server(app);
@@ -80,10 +80,14 @@ io.on("connection", client => {
 
   // Create a subscription for this new client to the occupancy changes
   // TODO subscribe to realOccupancyChanges instead of simulatedOccupancyChanges
-  const sub = realOccupancyChanges.subscribe(action => {
+  const notifyClient = action => {
     console.log("Send: " + action.type + ", " + JSON.stringify(action.payload));
     client.emit(action.type, action.payload);
-  });
+  };
+  const sub = simulatedOccupancyChanges.subscribe(action =>
+    notifyClient(action)
+  );
+  const sub2 = realOccupancyChanges.subscribe(action => notifyClient(action));
 
   // TODO These types of client actions are ones we went to process
   // through our own agent/store
@@ -95,6 +99,7 @@ io.on("connection", client => {
   client.on("disconnect", () => {
     console.log("Client disconnected");
     sub.unsubscribe();
+    sub2.unsubscribe();
   });
 });
 

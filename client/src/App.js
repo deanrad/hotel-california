@@ -52,17 +52,22 @@ agent.on(
 const firstClick = new Promise(resolve =>
   document.addEventListener("click", resolve)
 );
-const sub = interval(5000)
-  .pipe(
-    map(() => {
-      const roomNum = ["10", "11", "20", "21", "30", "31"][
-        Math.floor(Math.random() * 6.0)
-      ];
-      return { type: "holdRoom", payload: { num: roomNum, hold: true } };
-    })
-  )
-  .subscribe(action => agent.process(action));
-firstClick.then(() => sub.unsubscribe());
+const randomHolds = interval(5000).pipe(
+  map(() => {
+    const roomNum = ["10", "11", "20", "21", "30", "31"][
+      Math.floor(Math.random() * 6.0)
+    ];
+    return { type: "holdRoom", payload: { num: roomNum, hold: true } };
+  })
+);
+if (document.location.hash === "#demo") {
+  console.log("entering demo mode");
+  const sub = randomHolds.subscribe(action => agent.process(action));
+  firstClick.then(() => {
+    sub.unsubscribe();
+    console.log("canceled demo mode");
+  });
+}
 
 // TODO Return an Observable of the objects we recieve
 // in the callbacks of: socket.on("setOccupancy", ...)
