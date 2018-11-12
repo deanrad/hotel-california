@@ -40,7 +40,8 @@ agent.on(
       }
     }));
   },
-  { processResults: true }
+  // TODO ensure that a client can 'keep alive' a hold by renewing the previous timer each time
+  { processResults: true, concurrency: 'cutoff' }
 );
 
 // TODO Return an Observable of the objects we recieve
