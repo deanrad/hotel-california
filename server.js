@@ -71,7 +71,7 @@ io.on("connection", client => {
 });
 
 // This should be subscribed once per
-var simulatedOccupancyChanges = interval(5000).pipe(
+var simulatedOccupancyChanges = interval(2000).pipe(
   map(i => i % 2 === 1),
   map(hold => ({
     type: "setOccupancy",

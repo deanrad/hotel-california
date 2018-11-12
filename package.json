@@ -1,11 +1,11 @@
 {
   "name": "hotel-california-monorepo",
   "version": "1.0.0",
-  "description": "Example on using create-react-app with a Node Express Backend",
+  "description": "Example Antares Application",
   "author": {
-    "name": "Esau Silva",
-    "email": "esausilva85@gmail.com",
-    "url": "https://esausilva.com"
+    "name": "Dean Radcliffe",
+    "email": "deanmisc@yahoo.com",
+    "url": "https://github.com/deanius/antares"
   },
   "license": "MIT",
   "scripts": {
