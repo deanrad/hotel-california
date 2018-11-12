@@ -1,17 +1,35 @@
 {
-  "name": "create-react-app-express",
+  "name": "hotel-california",
   "version": "0.1.0",
   "license": "MIT",
   "dependencies": {
-    "react": "^16.1.1",
-    "react-dom": "^16.1.1",
-    "react-scripts": "1.0.17"
+    "antares-protocol": "^2.8.1",
+    "react": "^16.5.2",
+    "react-dom": "^16.5.2",
+    "react-redux": "^5.1.0",
+    "react-scripts": "2.0.2",
+    "redux": "^4.0.1",
+    "reselect": "^4.0.0",
+    "socket.io-client": "^2.1.1"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "storybook": "start-storybook -p 9009 -s public",
+    "build-storybook": "build-storybook -s public"
   },
-  "proxy": "http://localhost:5000/"
+  "proxy": "http://localhost:8470/",
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "devDependencies": {
+    "@storybook/addon-actions": "^3.4.11",
+    "@storybook/addon-links": "^3.4.11",
+    "@storybook/react": "^3.4.11"
+  }
 }

@@ -1,0 +1,75 @@
+.room {
+  display: inline-block;
+  width: 100px;
+  height: 80px;
+  padding: 20px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 2rem;
+  box-sizing: border-box;
+  margin: 1px;
+}
+.room.sm {
+  display: inline-block;
+  width: 50px;
+  height: 40px;
+  padding: 10px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.open {
+  background-color: #635c44;
+  color: white;
+  cursor: pointer;
+}
+
+.hold {
+  background-color: #bdb084;
+  opacity: 0.8;
+  color: #ffffff;
+  border: 3px dashed #8a6f0e;
+  background-image: linear-gradient(
+    45deg,
+    #c2ba9b 10.53%,
+    #bdb084 10.53%,
+    #bdb084 50%,
+    #c2ba9b 50%,
+    #c2ba9b 60.53%,
+    #bdb084 60.53%,
+    #bdb084 100%
+  );
+  background-size: 53.74px 53.74px;
+}
+.hold.sm {
+  border: 2px dashed #8a6f0e;
+}
+.hold.mine {
+  border: 2px dashed red;
+}
+
+.full {
+  background-image: linear-gradient(
+    45deg,
+    #e8e8e8 25%,
+    #bdb084 25%,
+    #bdb084 50%,
+    #e8e8e8 50%,
+    #e8e8e8 75%,
+    #bdb084 75%,
+    #bdb084 100%
+  );
+  background-size: 56.57px 56.57px;
+  cursor: not-allowed;
+}
+
+.legend {
+  display: block;
+  width: 6em;
+  box-sizing: border-box;
+}
+.legend.hold {
+  border-width: 2px;
+}

@@ -1,8 +1,7 @@
 {
-  "name": "example-create-react-app-express",
+  "name": "hotel-california-monorepo",
   "version": "1.0.0",
-  "description":
-    "Example on using create-react-app with a Node Express Backend",
+  "description": "Example on using create-react-app with a Node Express Backend",
   "author": {
     "name": "Esau Silva",
     "email": "esausilva85@gmail.com",
@@ -10,23 +9,35 @@
   },
   "license": "MIT",
   "scripts": {
-    "client": "cd client && yarn start",
+    "yarns": "yarn && cd client && yarn && cd -",
+    "start": "yarn run yarns && yarn run dev",
+    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
     "server": "nodemon server.js",
-    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
+    "client": "export PORT=3120; cd client && yarn start",
+    "storybook": "cd client && yarn storybook",
+    "dev:server": "cd client && yarn build && cd .. && yarn start",
+    "heroku-postbuild": "cd client && npm install && npm install --only=dev --no-shrinkwrap && npm run build"
   },
   "dependencies": {
-    "express": "^4.16.2"
+    "express": "^4.16.3",
+    "rxjs": "^6.3.3",
+    "socket.io": "^2.1.1"
   },
   "devDependencies": {
-    "concurrently": "^3.5.0"
+    "concurrently": "^4.0.1",
+    "jsx-html-class": "^1.0.3",
+    "morgan": "^1.9.1"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/esausilva/example-create-react-app-express.git"
   },
   "bugs": {
-    "url":
-      "https://github.com/esausilva/example-create-react-app-express/issues"
+    "url": "https://github.com/esausilva/example-create-react-app-express/issues"
   },
-  "keywords": ["node", "express", "create-react-app"]
+  "keywords": [
+    "node",
+    "express",
+    "create-react-app"
+  ]
 }

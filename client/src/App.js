@@ -1,22 +1,48 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
+import io from "socket.io-client";
 
-import logo from './logo.svg';
+import "./App.css";
+import Select from "./routes/Select";
+import { store } from "./store";
+import { Observable } from "rxjs";
+import { ajaxStreamingGet, Agent, concat } from "antares-protocol";
 
-import './App.css';
+const agent = new Agent();
+agent.addFilter(({ action }) => store.dispatch(action));
+
+const url =
+  process.env.NODE_ENV === "production"
+    ? document.location.href.replace(/\/\w+$/, "") // get rid of path
+    : "http://localhost:8470";
+
+const socket = io(url);
+socket.on("hello", () => {
+  agent.process({ type: "socket.connect" });
+});
+const liveOccupancyPayloads = () => {
+  return new Observable(notify => {
+    socket.on("setOccupancy", payload => notify.next(payload));
+  });
+};
 
 class App extends Component {
-  state = {
-    response: ''
-  };
-
   componentDidMount() {
-    this.callApi()
-      .then(res => this.setState({ response: res.express }))
+    this.callApi("/api/rooms")
+      .then(({ objects }) => {
+        agent.process({ type: "loadRooms", payload: objects });
+      })
       .catch(err => console.log(err));
+
+    concat(
+      ajaxStreamingGet({
+        url: "/api/occupancy"
+      }),
+      liveOccupancyPayloads()
+    ).subscribe(payload => agent.process({ type: "setOccupancy", payload }));
   }
 
-  callApi = async () => {
-    const response = await fetch('/api/hello');
+  callApi = async url => {
+    const response = await fetch(url);
     const body = await response.json();
 
     if (response.status !== 200) throw Error(body.message);
@@ -27,11 +53,7 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">{this.state.response}</p>
+        <Select store={store} />
       </div>
     );
   }
