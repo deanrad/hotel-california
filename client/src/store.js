@@ -11,6 +11,15 @@ const reducer = (state = initialState, action) => {
         ...state,
         room: action.payload
       };
+    case "holdRoom":
+      const { hold } = action.payload;
+      return {
+        ...state,
+        occupancy: {
+          ...state.occupancy,
+          [action.payload.num]: hold ? "hold" : "open"
+        }
+      };
     // get a single {num, occupancy} payload, where num is the key
     case "setOccupancy":
       const { occupancy, num } = action.payload;

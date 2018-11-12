@@ -63,6 +63,10 @@ io.on("connection", client => {
     client.emit(action.type, action.payload);
   });
 
+  client.on("holdRoom", payload => {
+    console.log("Recv: holdRoom, " + JSON.stringify(payload));
+  });
+
   // Be sure and clean up resources when done
   client.on("disconnect", () => {
     console.log("Client disconnected");

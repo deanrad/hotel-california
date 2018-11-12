@@ -4,8 +4,8 @@ import io from "socket.io-client";
 import "./App.css";
 import Select from "./routes/Select";
 import { store } from "./store";
-import { Observable } from "rxjs";
-import { ajaxStreamingGet, Agent, concat } from "antares-protocol";
+import { Observable, empty } from "rxjs";
+import { ajaxStreamingGet, Agent, concat, after } from "antares-protocol";
 
 const agent = new Agent();
 window._agent = agent;
@@ -20,6 +20,28 @@ const socket = io(url);
 socket.on("hello", () => {
   agent.process({ type: "socket.connect" });
 });
+
+// TODO When any component sends us a holdRoom action, forward it via the WS.
+agent.on("holdRoom", ({ action }) => {
+  socket.emit("holdRoom", action.payload);
+});
+
+// TODO After 3 seconds, release the hold
+agent.on(
+  "holdRoom",
+  ({ action }) => {
+    const { num, hold } = action.payload;
+    if (!hold) return empty();
+    return after(3000, () => ({
+      type: "holdRoom",
+      payload: {
+        num,
+        hold: false
+      }
+    }));
+  },
+  { processResults: true }
+);
 
 // TODO Return an Observable of the objects we recieve
 // in the callbacks of: socket.on("setOccupancy", ...)
