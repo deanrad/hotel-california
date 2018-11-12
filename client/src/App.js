@@ -19,7 +19,10 @@ const socket = io(url);
 socket.on("hello", () => {
   agent.process({ type: "socket.connect" });
 });
-const liveOccupancyPayloads = () => {
+
+// TODO Return an Observable of the objects we recieve
+// in the callbacks of: socket.on("setOccupancy", ...)
+const wsOccupancyPayloads = () => {
   return new Observable(notify => {
     socket.on("setOccupancy", payload => notify.next(payload));
   });
@@ -27,18 +30,24 @@ const liveOccupancyPayloads = () => {
 
 class App extends Component {
   componentDidMount() {
+    // TODO With the objects field of the /api/rooms GET result
+    // send it to the store in an action of type `loadRooms`
     this.callApi("/api/rooms")
       .then(({ objects }) => {
         agent.process({ type: "loadRooms", payload: objects });
       })
       .catch(err => console.log(err));
 
+    // TODO For the Observable of results from the /api/occupancy REST endpoint,
+    // send each to the store in an action of type `setOccupancy`
     concat(
+      // TODO Return an Observable of the results from the /api/occupancy REST endpoint
       ajaxStreamingGet({
         url: "/api/occupancy"
       }),
-      liveOccupancyPayloads()
-    ).subscribe(payload => agent.process({ type: "setOccupancy", payload }));
+      // TODO Return an Observable of the results from WS 'setOccupancy' messages
+      wsOccupancyPayloads()
+      ).subscribe(payload => agent.process({ type: "setOccupancy", payload }));
   }
 
   callApi = async url => {
