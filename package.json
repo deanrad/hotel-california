@@ -11,8 +11,9 @@
   "scripts": {
     "yarns": "yarn && cd client && yarn && cd -",
     "start": "yarn run yarns && yarn run dev",
-    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
-    "server": "nodemon server.js",
+    "dev": "concurrently --kill-others-on-fail \"yarn server-dev\" \"yarn client\"",
+    "server-dev": "nodemon server.js",
+    "server": "node server.js",
     "client": "export PORT=3120; cd client && yarn start",
     "storybook": "cd client && yarn storybook",
     "dev:server": "cd client && yarn build && cd .. && yarn start",
