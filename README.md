@@ -14,6 +14,14 @@ API requests `/api/rooms` and `/api/occupancy` are served up by the code in `/se
 
 Other than that, it's basic Create React App.
 
+## Storybook
+
+`npm run storybook`
+
+This will show you the UI development framework Storybook, which was used
+to get the look of the React components correct in each state. It's a great
+tool for iterative design with a great team.
+
 ## Giving Back
 
 Hey, buy this guy a coffee while you're here, he started the repo - thanks Esau, enjoy I enjoyed your project a latte!
