@@ -8,6 +8,7 @@ import { Observable } from "rxjs";
 import { ajaxStreamingGet, Agent, concat } from "antares-protocol";
 
 const agent = new Agent();
+window._agent = agent;
 agent.addFilter(({ action }) => store.dispatch(action));
 
 const url =
@@ -47,7 +48,7 @@ class App extends Component {
       }),
       // TODO Return an Observable of the results from WS 'setOccupancy' messages
       wsOccupancyPayloads()
-      ).subscribe(payload => agent.process({ type: "setOccupancy", payload }));
+    ).subscribe(payload => agent.process({ type: "setOccupancy", payload }));
   }
 
   callApi = async url => {
