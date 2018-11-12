@@ -1,55 +1,21 @@
-# create-react-app React Project with Node Express Backend
+# Hotel California
 
-> Example on using create-react-app with a Node Express Backend
+> You can check out any time you like but, you can never leave! - The Eagles
 
 ## Usage
 
-Install [nodemon](https://github.com/remy/nodemon) globally
+`npm start`
 
-```
-npm i nodemon -g
-```
+## Structure
 
-Install server and client dependencies
+The project runs a node server (`/server.js`) on port 8470,
+and a webpack server on port 3120 concurrently (aka in "parallel" mode).
+API requests `/api/rooms` and `/api/occupancy` are served up by the code in `/server.js`.
 
-```
-yarn
-cd client
-yarn
-```
-
-To start the server and client at the same time (from the root of the project)
-
-```
-yarn dev
-```
-
-Running the production build on localhost. This will create a production build, then Node will serve the app on http://localhost:5000
-
-```
-NODE_ENV=production yarn dev:server
-```
-
-## How this works
-
-The key to use an Express backend with a project created with `create-react-app` is on using a **proxy**. We have a _proxy_ entry in `client/package.json`
-
-```
-"proxy": "http://localhost:5000/"
-```
-
-This tells Webpack development server to proxy our API requests to our API server, given that our Express server is running on **localhost:5000**
-
-## Tutorial
-
-Visit my [blog post](https://medium.freecodecamp.org/how-to-make-create-react-app-work-with-a-node-backend-api-7c5c48acb1b0) entry for a detailed step-by-step guide.
-
-[Deployed app](https://cra-express.herokuapp.com/)
+Other than that, it's basic Create React App.
 
 ## Giving Back
 
-If you would like to support my work and the time I put in making tutorials, you can click the image below to get me a coffee. I would really appreciate it (but is not required).
+Hey, buy this guy a coffee while you're here, he started the repo - thanks Esau, enjoy I enjoyed your project a latte!
 
 [![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/black_img.png)](https://www.buymeacoffee.com/esausilva)
-
--Esau

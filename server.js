@@ -2,7 +2,7 @@ const express = require("express");
 const path = require("path");
 const morgan = require("morgan");
 const { interval } = require("rxjs");
-const { map, share } = require("rxjs/operators");
+const { map, tap, share } = require("rxjs/operators");
 const app = express();
 const http = require("http").Server(app);
 const port = process.env.PORT || 8470;
@@ -57,13 +57,17 @@ const io = require("socket.io").listen(http);
 io.on("connection", client => {
   console.log("Got a client connection!");
 
-  // Create an Observable, and subscribe to it
-  simulatedOccupancyChanges.subscribe(action => {
-    console.log("Sending: " + JSON.stringify(action));
+  // Create a subscription for this new client to the occupancy changes
+  const sub = simulatedOccupancyChanges.subscribe(action => {
+    console.log("Send: " + action.type + ", " + JSON.stringify(action.payload));
     client.emit(action.type, action.payload);
   });
 
-  client.on("disconnect", () => console.log("Client disconnected"));
+  // Be sure and clean up resources when done
+  client.on("disconnect", () => {
+    console.log("Client disconnected");
+    sub.unsubscribe();
+  });
 });
 
 // This should be subscribed once per
@@ -76,5 +80,8 @@ var simulatedOccupancyChanges = interval(5000).pipe(
       occupancy: hold ? "hold" : "open"
     }
   })),
+  tap(({ payload: { num, occupancy } }) =>
+    console.log(`> Room ${num} is now ${occupancy}`)
+  ),
   share()
 );
