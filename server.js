@@ -1,11 +1,15 @@
 const express = require("express");
 const path = require("path");
 const morgan = require("morgan");
+
 const { interval } = require("rxjs");
 const { map, tap, share } = require("rxjs/operators");
 const app = express();
 const http = require("http").Server(app);
 const port = process.env.PORT || 8470;
+
+// TODO Bring in a store
+const { store } = require("./server-store");
 
 app.use(morgan("dev"));
 
@@ -14,30 +18,27 @@ app.get("/api/hello", (req, res) => {
   res.send({ express: "Hello From The Server." });
 });
 
+// TODO Return state of store instead of hardcoded
 app.get("/api/rooms", (req, res) => {
-  const rooms = [
-    { num: "30" },
-    { num: "31" },
-    { num: "20" },
-    { num: "21" },
-    { num: "10" },
-    { num: "11" }
-  ];
+  const { rooms } = store.getState();
   res.send({
     count: rooms.length,
     objects: rooms
   });
 });
 
+// TODO Return state of store instead of hardcoded
+// TODO Build up {num, occupancy} objects from the state
+const createRoomViews = state => {
+  const { rooms, occupancy } = state;
+  return rooms.map(room => ({
+    ...room,
+    occupancy: occupancy[room.num] || "open"
+  }));
+};
+
 app.get("/api/occupancy", (req, res) => {
-  res.send([
-    { num: "10", occupancy: "full" },
-    { num: "11", occupancy: "open" },
-    { num: "20", occupancy: "open" },
-    { num: "21", occupancy: "full" },
-    { num: "30", occupancy: "hold" },
-    { num: "31", occupancy: "hold" }
-  ]);
+  res.send(createRoomViews(store.getState()));
 });
 
 if (process.env.NODE_ENV === "production") {
@@ -52,22 +53,45 @@ if (process.env.NODE_ENV === "production") {
 
 http.listen(port, () => console.log(`Server listening on port ${port}`));
 
+const { Agent } = require("antares-protocol");
+const agent = new Agent();
+
+// TODO Define an Observable that maps processed actions of type 'holdRoom'
+// to FSAs of type setOccupancy (which will be sent out to clients)
+const realOccupancyChanges = agent.allOfType("holdRoom").pipe(
+  map(action => ({
+    type: "setOccupancy",
+    payload: {
+      num: action.payload.num,
+      occupancy: action.payload.hold ? "hold" : "open"
+    }
+  }))
+);
+
+// TODO Process holdRoom actions through the store so new clients
+// will get the actual state. Later, we'll persist the change in the db
+agent.addFilter(({ action }) => store.dispatch(action), {
+  actionsOfType: "holdRoom"
+});
 // WebSocket stuff follows
 const io = require("socket.io").listen(http);
 io.on("connection", client => {
   console.log("Got a client connection!");
 
   // Create a subscription for this new client to the occupancy changes
-  const sub = simulatedOccupancyChanges.subscribe(action => {
+  // TODO subscribe to realOccupancyChanges instead of simulatedOccupancyChanges
+  const sub = realOccupancyChanges.subscribe(action => {
     console.log("Send: " + action.type + ", " + JSON.stringify(action.payload));
     client.emit(action.type, action.payload);
   });
 
+  // TODO These types of client actions are ones we went to process
+  // through our own agent/store
   client.on("holdRoom", payload => {
-    console.log("Recv: holdRoom, " + JSON.stringify(payload));
+    agent.process({ type: "holdRoom", payload });
   });
 
-  // Be sure and clean up resources when done
+  // Be sure and clean up our resources when done
   client.on("disconnect", () => {
     console.log("Client disconnected");
     sub.unsubscribe();

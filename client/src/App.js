@@ -4,11 +4,14 @@ import io from "socket.io-client";
 import "./App.css";
 import Select from "./routes/Select";
 import { store } from "./store";
-import { Observable, empty } from "rxjs";
+import { Observable, empty, interval } from "rxjs";
+import { map } from "rxjs/operators";
 import { ajaxStreamingGet, Agent, concat, after } from "antares-protocol";
 
 const agent = new Agent();
 window._agent = agent;
+Object.assign(window, { ajaxStreamingGet, concat, after });
+
 agent.addFilter(({ action }) => store.dispatch(action));
 
 const url =
@@ -41,8 +44,25 @@ agent.on(
     }));
   },
   // TODO ensure that a client can 'keep alive' a hold by renewing the previous timer each time
-  { processResults: true, concurrency: 'cutoff' }
+  { processResults: true, concurrency: "cutoff" }
 );
+
+// TODO every 5 seconds Hold a random room
+// TODO cancel upon the first click on the document
+const firstClick = new Promise(resolve =>
+  document.addEventListener("click", resolve)
+);
+const sub = interval(5000)
+  .pipe(
+    map(() => {
+      const roomNum = ["10", "11", "20", "21", "30", "31"][
+        Math.floor(Math.random() * 6.0)
+      ];
+      return { type: "holdRoom", payload: { num: roomNum, hold: true } };
+    })
+  )
+  .subscribe(action => agent.process(action));
+firstClick.then(() => sub.unsubscribe());
 
 // TODO Return an Observable of the objects we recieve
 // in the callbacks of: socket.on("setOccupancy", ...)

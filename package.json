@@ -20,8 +20,10 @@
     "heroku-postbuild": "cd client && npm install && npm install --only=dev --no-shrinkwrap && npm run build"
   },
   "dependencies": {
+    "antares-protocol": "^2.8.1",
     "express": "^4.16.3",
     "morgan": "^1.9.1",
+    "redux": "^4.0.1",
     "rxjs": "^6.3.3",
     "socket.io": "^2.1.1"
   },
