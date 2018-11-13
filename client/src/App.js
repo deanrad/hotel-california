@@ -4,7 +4,7 @@ import io from "socket.io-client";
 import "./App.css";
 import Select from "./routes/Select";
 import { store } from "./store";
-import { process } from "./agent";
+import { process, agent } from "./agent";
 import { ajaxStreamingGet } from "antares-protocol";
 import { Observable, interval } from "rxjs";
 import { map } from "rxjs/operators";
@@ -18,6 +18,10 @@ const socket = io(url);
 socket.on("hello", () => {
   console.log({ type: "socket.connect" });
 });
+
+// TODO A consequence of us seeing a "holdRoom" action is
+// we will put it on the socket to the server
+agent.on("holdRoom", ({ action }) => socket.emit("holdRoom", action.payload));
 
 // TODO Create an Observable of WS setOccupancy payloads
 const socketOccupancies = new Observable(notify => {
