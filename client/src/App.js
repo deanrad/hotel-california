@@ -6,9 +6,8 @@ import Select from "./routes/Select";
 import { store } from "./store";
 import { process } from "./agent";
 import { ajaxStreamingGet } from "antares-protocol";
-import { Observable
-} from "rxjs";
-import {} from "rxjs/operators";
+import { Observable, interval } from "rxjs";
+import { map } from "rxjs/operators";
 
 const url =
   process.NODE_ENV === "production"
@@ -20,7 +19,7 @@ socket.on("hello", () => {
   console.log({ type: "socket.connect" });
 });
 
-// TODO Create an Observable of WS holdRoom payloads
+// TODO Create an Observable of WS setOccupancy payloads
 const socketOccupancies = new Observable(notify => {
   socket.on("setOccupancy", payload => {
     process({ type: "setOccupancy", payload });
@@ -38,7 +37,22 @@ if (document.location.hash === "#demo") {
   const firstClick = new Promise(resolve =>
     document.addEventListener("click", resolve)
   );
+
+  const rooms = ["10", "11", "20", "21", "30", "31"];
+  const sub = interval(3000)
+    .pipe(
+      map(() => ({
+        type: "holdRoom",
+        payload: {
+          hold: true,
+          num: rooms[Math.floor(Math.random() * 6)]
+        }
+      }))
+    )
+    .subscribe(action => process(action));
+
   firstClick.then(() => {
+    sub.unsubscribe();
     console.log("canceled demo mode");
   });
 }
@@ -62,7 +76,7 @@ class App extends Component {
       process({ type: "setOccupancy", payload: record })
     );
 
-    socketOccupancies.subscribe()
+    socketOccupancies.subscribe();
   }
 
   callApi = async url => {
