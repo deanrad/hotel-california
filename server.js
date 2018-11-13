@@ -8,19 +8,37 @@ const app = express();
 const http = require("http").Server(app);
 const port = process.env.PORT || 8470;
 
-// TODO Bring in a store
-const { store } = require("./server-store");
+// TODO Bring in a store to keep clients in sync
 
 app.use(morgan("dev"));
 
 // API calls
+const initialState = {
+  rooms: [
+    { num: "30" },
+    { num: "31" },
+    { num: "20" },
+    { num: "21" },
+    { num: "10" },
+    { num: "11" }
+  ],
+  occupancy: {
+    "10": "full",
+    "11": "open",
+    "20": "open",
+    "21": "open",
+    "30": "open",
+    "31": "hold"
+  }
+};
+
 app.get("/api/hello", (req, res) => {
   res.send({ express: "Hello From The Server." });
 });
 
 // TODO Return state of store instead of hardcoded
 app.get("/api/rooms", (req, res) => {
-  const { rooms } = store.getState();
+  const { rooms } = initialState;
   res.send({
     count: rooms.length,
     objects: rooms
@@ -28,18 +46,17 @@ app.get("/api/rooms", (req, res) => {
 });
 
 // TODO Return state of store instead of hardcoded
-// TODO Build up {num, occupancy} objects from the state
-const createRoomViews = state => {
-  const { rooms, occupancy } = state;
+app.get("/api/occupancy", (req, res) => {
+  res.send(createRoomViews(initialState));
+});
+
+// Build up {num, occupancy} objects from the state
+function createRoomViews({ rooms, occupancy }) {
   return rooms.map(room => ({
     ...room,
     occupancy: occupancy[room.num] || "open"
   }));
-};
-
-app.get("/api/occupancy", (req, res) => {
-  res.send(createRoomViews(store.getState()));
-});
+}
 
 if (process.env.NODE_ENV === "production") {
   // Serve any static files
@@ -53,57 +70,35 @@ if (process.env.NODE_ENV === "production") {
 
 http.listen(port, () => console.log(`Server listening on port ${port}`));
 
-const { Agent } = require("antares-protocol");
-const agent = new Agent();
-
 // TODO Define an Observable that maps processed actions of type 'holdRoom'
 // to FSAs of type setOccupancy (which will be sent out to clients)
-const realOccupancyChanges = agent.allOfType("holdRoom").pipe(
-  map(action => ({
-    type: "setOccupancy",
-    payload: {
-      num: action.payload.num,
-      occupancy: action.payload.hold ? "hold" : "open"
-    }
-  }))
-);
 
 // TODO Process holdRoom actions through the store so new clients
 // will get the actual state. Later, we'll persist the change in the db
-agent.addFilter(({ action }) => store.dispatch(action), {
-  actionsOfType: "holdRoom"
-});
-// WebSocket stuff follows
+
+// ------------ WebSocket stuff follows -------------------- //
 const io = require("socket.io").listen(http);
 io.on("connection", client => {
   console.log("Got a client connection!");
 
-  // Create a subscription for this new client to the occupancy changes
-  // TODO subscribe to realOccupancyChanges instead of simulatedOccupancyChanges
   const notifyClient = action => {
     console.log("Send: " + action.type + ", " + JSON.stringify(action.payload));
     client.emit(action.type, action.payload);
   };
-  const sub = simulatedOccupancyChanges.subscribe(action =>
-    notifyClient(action)
-  );
-  const sub2 = realOccupancyChanges.subscribe(action => notifyClient(action));
 
-  // TODO These types of client actions are ones we went to process
-  // through our own agent/store
-  client.on("holdRoom", payload => {
-    agent.process({ type: "holdRoom", payload });
-  });
+  // TODO Create a subscription for this new client to some occupancy changes
+  // TODO subscribe to realOccupancyChanges AND simulatedOccupancyChanges
+
+  // TODO "holdRoom" types of client actions are ones we went to process
+  // through our own agent/store so new clients get the current state
 
   // Be sure and clean up our resources when done
   client.on("disconnect", () => {
     console.log("Client disconnected");
-    sub.unsubscribe();
-    sub2.unsubscribe();
   });
 });
 
-// This should be subscribed once per
+// TODO connect an Observable of simulted occupancy changes to each new client
 var simulatedOccupancyChanges = interval(5000).pipe(
   map(i => i % 2 === 1),
   map(hold => ({
@@ -112,9 +107,7 @@ var simulatedOccupancyChanges = interval(5000).pipe(
       num: "20",
       occupancy: hold ? "hold" : "open"
     }
-  })),
-  tap(({ payload: { num, occupancy } }) =>
-    console.log(`> Room ${num} is now ${occupancy}`)
-  ),
-  share()
+  }))
+  // TODO Output messages about to be sent in the console with tap()
+  // TODO Keep clients in sync by using share()
 );

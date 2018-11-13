@@ -1,6 +1,7 @@
 import React from "react";
 import RoomView from "../RoomView";
 import { connect } from "react-redux";
+import { process } from "../agent";
 
 export const chunkIntoFloors = roomViews => {
   const floors = [];
@@ -28,7 +29,13 @@ export const mapStateToProps = state => {
 export const Floor = ({ mini, children: rooms }) => (
   <div className="floor">
     {rooms.map(room => (
-      <RoomView key={room.num} {...{ ...room, mini }} />
+      <RoomView
+        key={room.num}
+        {...{ ...room, mini }}
+        onClick={() =>
+          process({ type: "holdRoom", payload: { num: room.num, hold: true } })
+        }
+      />
     ))}
   </div>
 );
