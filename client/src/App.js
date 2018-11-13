@@ -8,11 +8,15 @@ import { Observable, empty, interval } from "rxjs";
 import { map } from "rxjs/operators";
 import { ajaxStreamingGet, Agent, concat, after } from "antares-protocol";
 
-const agent = new Agent();
-window._agent = agent;
-Object.assign(window, { ajaxStreamingGet, concat, after });
+const agente = new Agent();
+Object.assign(agente, {
+  cuando: agente.on,
+  filtrar: agente.addFilter,
+  nuevo: agente.process
+});
+Object.assign(window, { ajaxStreamingGet, concat, after, agente, store });
 
-agent.addFilter(({ action }) => store.dispatch(action));
+agente.filtrar(({ action }) => store.dispatch(action));
 
 const url =
   process.env.NODE_ENV === "production"
@@ -21,16 +25,16 @@ const url =
 
 const socket = io(url);
 socket.on("hello", () => {
-  agent.process({ type: "socket.connect" });
+  agente.nuevo({ type: "socket.connect" });
 });
 
 // TODO When any component sends us a holdRoom action, forward it via the WS.
-agent.on("holdRoom", ({ action }) => {
+agente.cuando("holdRoom", ({ action }) => {
   socket.emit("holdRoom", action.payload);
 });
 
 // TODO After 3 seconds, release the hold
-agent.on(
+agente.cuando(
   "holdRoom",
   ({ action }) => {
     const { num, hold } = action.payload;
@@ -62,7 +66,7 @@ const randomHolds = interval(5000).pipe(
 );
 if (document.location.hash === "#demo") {
   console.log("entering demo mode");
-  const sub = randomHolds.subscribe(action => agent.process(action));
+  const sub = randomHolds.subscribe(action => agente.nuevo(action));
   firstClick.then(() => {
     sub.unsubscribe();
     console.log("canceled demo mode");
@@ -83,7 +87,7 @@ class App extends Component {
     // send it to the store in an action of type `loadRooms`
     this.callApi("/api/rooms")
       .then(({ objects }) => {
-        agent.process({ type: "loadRooms", payload: objects });
+        agente.nuevo({ type: "loadRooms", payload: objects });
       })
       .catch(err => console.log(err));
 
@@ -96,7 +100,7 @@ class App extends Component {
       }),
       // TODO Return an Observable of the results from WS 'setOccupancy' messages
       wsOccupancyPayloads()
-    ).subscribe(payload => agent.process({ type: "setOccupancy", payload }));
+    ).subscribe(payload => agente.nuevo({ type: "setOccupancy", payload }));
   }
 
   callApi = async url => {

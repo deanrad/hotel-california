@@ -35,19 +35,19 @@ export const Floor = ({ mini, children: rooms }) => (
 const Select = ({ floors }) => {
   return (
     <div>
-      <h2>Welcome to the Hotel California !</h2>
-      <h3>Pick a room:</h3>
+      <h2>Bienvenidos al Hótel California !</h2>
+      <h3>Escoge un cuarto:</h3>
       <div className="hotel">
         {floors.map((floor, idx) => (
           <Floor key={idx}>{floor}</Floor>
         ))}
       </div>
       <p style={{ position: "fixed", right: 0, top: 0, margin: 20 }}>
-        Key:
-        <span className="legend open">Open</span>
-        <span className="legend hold">On Hold</span>
-        <span className="legend hold mine">Your Hold</span>
-        <span className="legend full">Not Avail</span>
+        Clave:
+        <span className="legend open">Abierto</span>
+        <span className="legend hold">En espera</span>
+        <span className="legend hold mine">Espera suya</span>
+        <span className="legend full">Occupado</span>
       </p>
     </div>
   );
