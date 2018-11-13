@@ -4,6 +4,7 @@ import io from "socket.io-client";
 import "./App.css";
 import Select from "./routes/Select";
 import { store } from "./store";
+import { process } from "./agent";
 import { ajaxStreamingGet } from "antares-protocol";
 import {} from "rxjs";
 import {} from "rxjs/operators";
@@ -43,14 +44,14 @@ class App extends Component {
     // send it to the agent, not store, in an action of type `loadRooms`
     this.callApi("/api/rooms")
       .then(({ objects }) => {
-        store.dispatch({ type: "loadRooms", payload: objects });
+        process({ type: "loadRooms", payload: objects });
       })
       .catch(err => console.log(err));
 
     // TODO 1) For the Observable of results from the /api/occupancy REST endpoint,
     // send each to the agent in an action of type `setOccupancy`
     ajaxStreamingGet({ url: "/api/occupancy" }).subscribe(record =>
-      store.dispatch({ type: "setOccupancy", payload: record })
+      process({ type: "setOccupancy", payload: record })
     );
   }
 
