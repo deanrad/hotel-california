@@ -6,7 +6,8 @@ import Select from "./routes/Select";
 import { store } from "./store";
 import { process } from "./agent";
 import { ajaxStreamingGet } from "antares-protocol";
-import {} from "rxjs";
+import { Observable
+} from "rxjs";
 import {} from "rxjs/operators";
 
 const url =
@@ -17,6 +18,13 @@ const url =
 const socket = io(url);
 socket.on("hello", () => {
   console.log({ type: "socket.connect" });
+});
+
+// TODO Create an Observable of WS holdRoom payloads
+const socketOccupancies = new Observable(notify => {
+  socket.on("setOccupancy", payload => {
+    process({ type: "setOccupancy", payload });
+  });
 });
 
 // TODO When any component processes a holdRoom action, forward it via the WS.
@@ -53,6 +61,8 @@ class App extends Component {
     ajaxStreamingGet({ url: "/api/occupancy" }).subscribe(record =>
       process({ type: "setOccupancy", payload: record })
     );
+
+    socketOccupancies.subscribe()
   }
 
   callApi = async url => {
