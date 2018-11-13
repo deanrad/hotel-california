@@ -86,7 +86,9 @@ io.on("connection", client => {
     client.emit(action.type, action.payload);
   };
 
-  // TODO Create a subscription for this new client to some occupancy changes
+  // Create a subscription for this new client to some occupancy changes
+  simulatedOccupancyChanges.subscribe(action => notifyClient(action));
+
   // TODO subscribe to realOccupancyChanges AND simulatedOccupancyChanges
 
   // TODO "holdRoom" types of client actions are ones we went to process
