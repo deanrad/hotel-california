@@ -4,15 +4,8 @@ import io from "socket.io-client";
 import "./App.css";
 import Select from "./routes/Select";
 import { store } from "./store";
-import { Observable, empty, interval } from "rxjs";
-import { map } from "rxjs/operators";
-import { ajaxStreamingGet, Agent, concat, after } from "antares-protocol";
-
-const agent = new Agent();
-window._agent = agent;
-Object.assign(window, { ajaxStreamingGet, concat, after });
-
-agent.addFilter(({ action }) => store.dispatch(action));
+import {} from "rxjs";
+import {} from "rxjs/operators";
 
 const url =
   process.env.NODE_ENV === "production"
@@ -21,82 +14,45 @@ const url =
 
 const socket = io(url);
 socket.on("hello", () => {
-  agent.process({ type: "socket.connect" });
+  console.log({ type: "socket.connect" });
 });
 
-// TODO When any component sends us a holdRoom action, forward it via the WS.
-agent.on("holdRoom", ({ action }) => {
-  socket.emit("holdRoom", action.payload);
-});
+// TODO When any component processes a holdRoom action, forward it via the WS.
 
-// TODO After 3 seconds, release the hold
-agent.on(
-  "holdRoom",
-  ({ action }) => {
-    const { num, hold } = action.payload;
-    if (!hold) return empty();
-    return after(3000, () => ({
-      type: "holdRoom",
-      payload: {
-        num,
-        hold: false
-      }
-    }));
-  },
-  // TODO ensure that a client can 'keep alive' a hold by renewing the previous timer each time
-  { processResults: true, concurrency: "cutoff" }
-);
+// TODO After 3 seconds, release a hold on a room
 
 // TODO every 5 seconds Hold a random room
 // TODO cancel upon the first click on the document
-const firstClick = new Promise(resolve =>
-  document.addEventListener("click", resolve)
-);
-const randomHolds = interval(5000).pipe(
-  map(() => {
-    const roomNum = ["10", "11", "20", "21", "30", "31"][
-      Math.floor(Math.random() * 6.0)
-    ];
-    return { type: "holdRoom", payload: { num: roomNum, hold: true } };
-  })
-);
 if (document.location.hash === "#demo") {
   console.log("entering demo mode");
-  const sub = randomHolds.subscribe(action => agent.process(action));
+  const firstClick = new Promise(resolve =>
+    document.addEventListener("click", resolve)
+  );
   firstClick.then(() => {
-    sub.unsubscribe();
     console.log("canceled demo mode");
   });
 }
 
 // TODO Return an Observable of the objects we recieve
 // in the callbacks of: socket.on("setOccupancy", ...)
-const wsOccupancyPayloads = () => {
-  return new Observable(notify => {
-    socket.on("setOccupancy", payload => notify.next(payload));
-  });
-};
 
 class App extends Component {
   componentDidMount() {
     // TODO With the objects field of the /api/rooms GET result
-    // send it to the store in an action of type `loadRooms`
+    // send it to the agent, not store, in an action of type `loadRooms`
     this.callApi("/api/rooms")
       .then(({ objects }) => {
-        agent.process({ type: "loadRooms", payload: objects });
+        store.dispatch({ type: "loadRooms", payload: objects });
       })
       .catch(err => console.log(err));
 
     // TODO For the Observable of results from the /api/occupancy REST endpoint,
-    // send each to the store in an action of type `setOccupancy`
-    concat(
-      // TODO Return an Observable of the results from the /api/occupancy REST endpoint
-      ajaxStreamingGet({
-        url: "/api/occupancy"
-      }),
-      // TODO Return an Observable of the results from WS 'setOccupancy' messages
-      wsOccupancyPayloads()
-    ).subscribe(payload => agent.process({ type: "setOccupancy", payload }));
+    // send each to the agent in an action of type `setOccupancy`
+    this.callApi("/api/occupancy").then(records => {
+      records.forEach(record =>
+        store.dispatch({ type: "setOccupancy", payload: record })
+      );
+    });
   }
 
   callApi = async url => {
