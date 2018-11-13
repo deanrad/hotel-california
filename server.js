@@ -87,7 +87,9 @@ io.on("connection", client => {
   };
 
   // Create a subscription for this new client to some occupancy changes
-  simulatedOccupancyChanges.subscribe(action => notifyClient(action));
+  const sub = simulatedOccupancyChanges.subscribe(action =>
+    notifyClient(action)
+  );
 
   // TODO subscribe to realOccupancyChanges AND simulatedOccupancyChanges
 
@@ -97,6 +99,7 @@ io.on("connection", client => {
   // Be sure and clean up our resources when done
   client.on("disconnect", () => {
     console.log("Client disconnected");
+    sub.unsubscribe();
   });
 });
 
@@ -109,7 +112,11 @@ var simulatedOccupancyChanges = interval(5000).pipe(
       num: "20",
       occupancy: hold ? "hold" : "open"
     }
-  }))
+  })),
   // TODO Output messages about to be sent in the console with tap()
+  tap(action => {
+    console.log("> Send:" + JSON.stringify(action));
+  }),
   // TODO Keep clients in sync by using share()
+  share()
 );
