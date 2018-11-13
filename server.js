@@ -4,6 +4,18 @@ const morgan = require("morgan");
 
 const { interval, merge, from } = require("rxjs");
 const { map, tap, share } = require("rxjs/operators");
+const { Agent } = require("antares-protocol");
+const agent = new Agent();
+
+const realOccupancyChanges = agent.allOfType("holdRoom").pipe(
+  map(action => ({
+    type: "setOccupancy",
+    payload: {
+      num: action.payload.num,
+      occupancy: action.payload.hold ? "hold" : "open"
+    }
+  }))
+);
 const app = express();
 const http = require("http").Server(app);
 const port = process.env.PORT || 8470;
@@ -91,13 +103,17 @@ io.on("connection", client => {
     notifyClient(action)
   );
 
+  // TODO link the unsubscribes
+  const sub2 = realOccupancyChanges.subscribe(notifyClient);
+  sub.add(() => sub2.unsubscribe());
+
   // TODO subscribe to realOccupancyChanges AND simulatedOccupancyChanges
 
   // TODO "holdRoom" types of client actions are ones we went to process
   // through our own agent/store so new clients get the current state
 
   client.on("holdRoom", ({ num, hold }) => {
-    console.log("Recv: " + JSON.stringify({ num, hold }));
+    agent.process({ type: "holdRoom", payload: { num, hold } });
   });
 
   // Be sure and clean up our resources when done
@@ -118,9 +134,9 @@ var simulatedOccupancyChanges = interval(5000).pipe(
     }
   })),
   // TODO Output messages about to be sent in the console with tap()
-  tap(action => {
-    console.log("> Send:" + JSON.stringify(action));
-  }),
+  // tap(action => {
+  //   console.log("> Send:" + JSON.stringify(action));
+  // }),
   // TODO Keep clients in sync by using share()
   share()
 );
