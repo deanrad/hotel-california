@@ -5,6 +5,16 @@ const morgan = require("morgan");
 const { interval, merge, from } = require("rxjs");
 const { map, tap, share } = require("rxjs/operators");
 
+// TODO connect to DB
+const mongoose = require("mongoose");
+
+const mongoUri = process.env.MONGODB_URI || "mongodb://localhost/antares-hotel";
+console.log("Connecting to " + mongoUri);
+// Set up promises with mongoose
+mongoose.Promise = Promise;
+// Connect to the Mongo DB
+mongoose.connect(mongoUri);
+
 // TODO Bring in the agent
 const { Agent } = require("antares-protocol");
 const agent = new Agent();
@@ -139,3 +149,19 @@ var simulatedOccupancyChanges = interval(5000).pipe(
   // TODO Keep clients in sync by using share()
   share()
 );
+
+// TODO Upon startup, ensure our database has rooms
+function createRoomModel() {
+  const Schema = mongoose.Schema;
+  const schema = new Schema({
+    num: { type: String, required: true },
+    occupancy: { type: String, default: "open" }
+  });
+  schema.plugin(require("mongoose-findorcreate"));
+  return mongoose.model("Room", schema);
+}
+
+const Room = createRoomModel();
+for (let { num, occupancy } of createRoomViews(initialState)) {
+  Room.findOrCreate({ num }, { occupancy });
+}
