@@ -14,6 +14,7 @@ console.log("Connecting to " + mongoUri);
 mongoose.Promise = Promise;
 // Connect to the Mongo DB
 mongoose.connect(mongoUri);
+const Room = createRoomModel();
 
 // TODO Bring in the agent
 const { Agent } = require("antares-protocol");
@@ -102,18 +103,23 @@ const io = require("socket.io").listen(http);
 io.on("connection", client => {
   console.log("Got a client connection!");
 
-  const notifyClient = action => {
-    console.log("Send: " + action.type + ", " + JSON.stringify(action.payload));
-    client.emit(action.type, action.payload);
+  const saveToDBAndNotify = action => {
+    const { num, occupancy } = action.payload;
+    Room.updateOne({ num }, { $set: { occupancy } }).then(() => {
+      console.log(
+        "Send: " + action.type + ", " + JSON.stringify(action.payload)
+      );
+      client.emit(action.type, action.payload);
+    });
   };
 
   // Create a subscription for this new client to some occupancy changes
   const sub = simulatedOccupancyChanges.subscribe(action =>
-    notifyClient(action)
+    saveToDBAndNotify(action)
   );
 
   // TODO link the unsubscribes
-  const sub2 = realOccupancyChanges.subscribe(notifyClient);
+  const sub2 = realOccupancyChanges.subscribe(saveToDBAndNotify);
   sub.add(() => sub2.unsubscribe());
 
   // TODO subscribe to realOccupancyChanges AND simulatedOccupancyChanges
@@ -161,7 +167,6 @@ function createRoomModel() {
   return mongoose.model("Room", schema);
 }
 
-const Room = createRoomModel();
 for (let { num, occupancy } of createRoomViews(initialState)) {
   Room.findOrCreate({ num }, { occupancy });
 }
