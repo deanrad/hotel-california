@@ -4,9 +4,12 @@ const morgan = require("morgan");
 
 const { interval, merge, from } = require("rxjs");
 const { map, tap, share } = require("rxjs/operators");
+
+// TODO Bring in the agent
 const { Agent } = require("antares-protocol");
 const agent = new Agent();
 
+// TODO Define an Observable that maps processed actions of type 'holdRoom' to FSAs of type "setOccupancy"
 const realOccupancyChanges = agent.allOfType("holdRoom").pipe(
   map(action => ({
     type: "setOccupancy",
@@ -16,11 +19,10 @@ const realOccupancyChanges = agent.allOfType("holdRoom").pipe(
     }
   }))
 );
+
 const app = express();
 const http = require("http").Server(app);
 const port = process.env.PORT || 8470;
-
-// TODO Bring in a store to keep clients in sync
 
 app.use(morgan("dev"));
 
@@ -81,9 +83,6 @@ if (process.env.NODE_ENV === "production") {
 }
 
 http.listen(port, () => console.log(`Server listening on port ${port}`));
-
-// TODO Define an Observable that maps processed actions of type 'holdRoom'
-// to FSAs of type setOccupancy (which will be sent out to clients)
 
 // TODO Process holdRoom actions through the store so new clients
 // will get the actual state. Later, we'll persist the change in the db
