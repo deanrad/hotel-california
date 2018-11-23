@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import io from "socket.io-client";
+import { ajaxStreamingGet, Agent } from "antares-protocol";
 
 import "./App.css";
 import Select from "./routes/Select";
 import { store } from "./store";
-import {} from "rxjs";
+import { Observable } from "rxjs";
 import {} from "rxjs/operators";
 
 const url =
@@ -35,6 +36,19 @@ if (document.location.hash === "#demo") {
 
 // TODO Return an Observable of the objects we recieve
 // in the callbacks of: socket.on("setOccupancy", ...)
+
+const socketOccupancies = new Observable(notify => {
+  socket.on("setOccupancy", payload => {
+    notify.next({
+      type: "setOccupancy",
+      payload
+    });
+  });
+});
+
+const agent = new Agent();
+agent.addFilter(({ action }) => store.dispatch(action));
+socketOccupancies.subscribe(action => agent.process(action));
 
 class App extends Component {
   componentDidMount() {

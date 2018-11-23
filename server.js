@@ -2,8 +2,8 @@ const express = require("express");
 const path = require("path");
 const morgan = require("morgan");
 
-const { interval, merge, from } = require("rxjs");
-const { map, tap, share } = require("rxjs/operators");
+const { interval } = require("rxjs");
+require("rxjs-compat");
 const app = express();
 const http = require("http").Server(app);
 const port = process.env.PORT || 8470;
@@ -86,28 +86,26 @@ io.on("connection", client => {
     client.emit(action.type, action.payload);
   };
 
-  // TODO Create a subscription for this new client to some occupancy changes
+  // Create a subscription for this new client to some occupancy changes
   // TODO subscribe to realOccupancyChanges AND simulatedOccupancyChanges
+  const sub = simulatedOccupancyChanges.subscribe(notifyClient);
 
-  // TODO "holdRoom" types of client actions are ones we went to process
-  // through our own agent/store so new clients get the current state
-
-  // Be sure and clean up our resources when done
   client.on("disconnect", () => {
+    sub.unsubscribe();
     console.log("Client disconnected");
   });
 });
 
 // TODO connect an Observable of simulted occupancy changes to each new client
-var simulatedOccupancyChanges = interval(5000).pipe(
-  map(i => i % 2 === 1),
-  map(hold => ({
+const simulatedOccupancyChanges = interval(5000)
+  .map(i => i % 2 === 1)
+  .map(hold => ({
     type: "setOccupancy",
     payload: {
       num: "20",
       occupancy: hold ? "hold" : "open"
     }
-  }))
-  // TODO Output messages about to be sent in the console with tap()
-  // TODO Keep clients in sync by using share()
-);
+  }));
+
+// TODO Output messages about to be sent in the console with tap()
+// TODO Keep clients in sync by using share()
