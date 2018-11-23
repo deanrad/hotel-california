@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import io from "socket.io-client";
-import { ajaxStreamingGet, Agent } from "antares-protocol";
+import { ajaxStreamingGet, Agent, after } from "antares-protocol";
 
 import "./App.css";
 import Select from "./routes/Select";
 import { store } from "./store";
-import { Observable, interval } from "rxjs";
+import { Observable, interval, empty } from "rxjs";
 import { map } from "rxjs/operators";
 
 const url =
@@ -60,9 +60,24 @@ const socketOccupancies = new Observable(notify => {
 });
 
 const agent = new Agent();
+window._agent = agent;
 agent.addFilter(({ action }) => store.dispatch(action));
 agent.on("holdRoom", ({ action }) => socket.emit("holdRoom", action.payload));
 socketOccupancies.subscribe(action => agent.process(action));
+
+// prettier-ignore
+agent.on("holdRoom", ({ action }) => {
+    const { num, hold } = action.payload;
+    if (!hold) return empty();
+    return after(3000, () => ({
+      type: "holdRoom",
+      payload: {
+        num,
+        hold: false
+      }}));
+  },
+  { processResults: true, concurrency: "cutoff" }
+);
 
 class App extends Component {
   componentDidMount() {
