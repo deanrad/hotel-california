@@ -5,8 +5,8 @@ import { ajaxStreamingGet, Agent } from "antares-protocol";
 import "./App.css";
 import Select from "./routes/Select";
 import { store } from "./store";
-import { Observable } from "rxjs";
-import {} from "rxjs/operators";
+import { Observable, interval } from "rxjs";
+import { map } from "rxjs/operators";
 
 const url =
   process.NODE_ENV === "production"
@@ -22,14 +22,27 @@ socket.on("hello", () => {
 
 // TODO After 3 seconds, release a hold on a room
 
-// TODO every 5 seconds Hold a random room
 // TODO cancel upon the first click on the document
 if (document.location.hash === "#demo") {
   console.log("entering demo mode");
+  // TODO every 5 seconds Hold a random room
+  const rooms = ["10", "11", "20", "21", "30", "31"];
+  const roomHolds = interval(5000).pipe(
+    map(() => ({
+      type: "holdRoom",
+      payload: {
+        hold: true,
+        num: rooms[Math.floor(Math.random() * 6)]
+      }
+    }))
+  );
+  const demoSub = roomHolds.subscribe(action => agent.process(action));
+
   const firstClick = new Promise(resolve =>
     document.addEventListener("click", resolve)
   );
   firstClick.then(() => {
+    demoSub.unsubscribe();
     console.log("canceled demo mode");
   });
 }
@@ -48,6 +61,7 @@ const socketOccupancies = new Observable(notify => {
 
 const agent = new Agent();
 agent.addFilter(({ action }) => store.dispatch(action));
+agent.on("holdRoom", ({ action }) => socket.emit("holdRoom", action.payload));
 socketOccupancies.subscribe(action => agent.process(action));
 
 class App extends Component {
