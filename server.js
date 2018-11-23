@@ -9,9 +9,13 @@ const app = express();
 const http = require("http").Server(app);
 const port = process.env.PORT || 8470;
 
-// TODO Bring in a store to keep clients in sync
-const { Agent } = require("antares-protocol")
-const agent = new Agent()
+const { store } = require("./server-store");
+const { Agent } = require("antares-protocol");
+const agent = new Agent();
+agent.addFilter(({ action }) => store.dispatch(action), {
+  actionsOfType: "holdRoom"
+});
+
 const realOccupancyChanges = agent.allOfType("holdRoom").pipe(
   map(action => ({
     type: "setOccupancy",
@@ -20,7 +24,7 @@ const realOccupancyChanges = agent.allOfType("holdRoom").pipe(
       occupancy: action.payload.hold ? "hold" : "open"
     }
   }))
-)
+);
 
 app.use(morgan("dev"));
 
@@ -48,9 +52,8 @@ app.get("/api/hello", (req, res) => {
   res.send({ express: "Hello From The Server." });
 });
 
-// TODO Return state of store instead of hardcoded
 app.get("/api/rooms", (req, res) => {
-  const { rooms } = initialState;
+  const { rooms } = store.getState();
   res.send({
     count: rooms.length,
     objects: rooms
@@ -59,7 +62,7 @@ app.get("/api/rooms", (req, res) => {
 
 // TODO Return state of store instead of hardcoded
 app.get("/api/occupancy", (req, res) => {
-  res.send(createRoomViews(initialState));
+  res.send(createRoomViews(store.getState()));
 });
 
 // Build up {num, occupancy} objects from the state
