@@ -105,7 +105,8 @@ const simulatedOccupancyChanges = interval(5000)
       num: "20",
       occupancy: hold ? "hold" : "open"
     }
-  }));
+  }))
+  .share();
 
 // TODO Output messages about to be sent in the console with tap()
 // TODO Keep clients in sync by using share()
