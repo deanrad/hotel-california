@@ -3,12 +3,24 @@ const path = require("path");
 const morgan = require("morgan");
 
 const { interval } = require("rxjs");
+const { map } = require("rxjs/operators");
 require("rxjs-compat");
 const app = express();
 const http = require("http").Server(app);
 const port = process.env.PORT || 8470;
 
 // TODO Bring in a store to keep clients in sync
+const { Agent } = require("antares-protocol")
+const agent = new Agent()
+const realOccupancyChanges = agent.allOfType("holdRoom").pipe(
+  map(action => ({
+    type: "setOccupancy",
+    payload: {
+      num: action.payload.num,
+      occupancy: action.payload.hold ? "hold" : "open"
+    }
+  }))
+)
 
 app.use(morgan("dev"));
 
@@ -89,9 +101,15 @@ io.on("connection", client => {
   // Create a subscription for this new client to some occupancy changes
   // TODO subscribe to realOccupancyChanges AND simulatedOccupancyChanges
   const sub = simulatedOccupancyChanges.subscribe(notifyClient);
+  const sub2 = realOccupancyChanges.subscribe(notifyClient);
+
+  client.on("holdRoom", ({ num, hold }) => {
+    agent.process({ type: "holdRoom", payload: { num, hold } });
+  });
 
   client.on("disconnect", () => {
     sub.unsubscribe();
+    sub2.unsubscribe();
     console.log("Client disconnected");
   });
 });
