@@ -16,15 +16,15 @@ agent.addFilter(({ action }) => store.dispatch(action), {
   actionsOfType: "holdRoom"
 });
 
-agent.on(
-  "holdRoom",
-  ({ action }) => {
-    if (process.env.NO_SOUND || !action.payload.hold) return;
+// prettier-ignore
+agent.on("holdRoom", ({ action }) => {
+    if (process.env.NO_SOUND || !action.payload.hold) return empty();
     return new Observable(notify => {
       const audio = player.play("hotelCalifClip.wav", () => {
         notify.complete();
       });
-
+      // when we are cutoff or unsubscribed, the cleanup function
+      // we return here will be invoked.
       return () => audio.kill();
     });
   },
