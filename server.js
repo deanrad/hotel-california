@@ -3,7 +3,7 @@ const path = require("path");
 const morgan = require("morgan");
 const player = require("play-sound")();
 
-const { interval, empty } = require("rxjs");
+const { interval, empty, Observable } = require("rxjs");
 const { map, share } = require("rxjs/operators");
 const app = express();
 const http = require("http").Server(app);
@@ -16,11 +16,20 @@ agent.addFilter(({ action }) => store.dispatch(action), {
   actionsOfType: "holdRoom"
 });
 
-agent.on("holdRoom", ({ action }) => {
-  if (process.env.NO_SOUND) return;
-  if (!action.payload.hold) return;
-  player.play("hotelCalifClip.wav");
-});
+agent.on(
+  "holdRoom",
+  ({ action }) => {
+    if (process.env.NO_SOUND || !action.payload.hold) return;
+    return new Observable(notify => {
+      const audio = player.play("hotelCalifClip.wav", () => {
+        notify.complete();
+      });
+
+      return () => audio.kill();
+    });
+  },
+  { concurrency: "parallel" }
+);
 
 const realOccupancyChanges = agent.allOfType("holdRoom").pipe(
   map(action => ({
