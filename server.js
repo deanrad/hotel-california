@@ -1,9 +1,10 @@
 const express = require("express");
 const path = require("path");
 const morgan = require("morgan");
+const player = require("play-sound")();
 
 const { interval, empty } = require("rxjs");
-const { map } = require("rxjs/operators");
+const { map, share } = require("rxjs/operators");
 const app = express();
 const http = require("http").Server(app);
 const port = process.env.PORT || 8470;
@@ -13,6 +14,12 @@ const { Agent } = require("antares-protocol");
 const agent = new Agent();
 agent.addFilter(({ action }) => store.dispatch(action), {
   actionsOfType: "holdRoom"
+});
+
+agent.on("holdRoom", ({ action }) => {
+  if (process.env.NO_SOUND) return;
+  if (!action.payload.hold) return;
+  player.play("hotelCalifClip.wav");
 });
 
 const realOccupancyChanges = agent.allOfType("holdRoom").pipe(
@@ -119,16 +126,17 @@ io.on("connection", client => {
 // TODO connect an Observable of simulted occupancy changes to each new client
 const simulatedOccupancyChanges = process.env.NO_DEMO
   ? empty()
-  : interval(5000)
-      .map(i => i % 2 === 1)
-      .map(hold => ({
+  : interval(5000).pipe(
+      map(i => i % 2 === 1),
+      map(hold => ({
         type: "setOccupancy",
         payload: {
           num: "20",
           occupancy: hold ? "hold" : "open"
         }
-      }))
-      .share();
+      })),
+      share()
+    );
 
 // TODO Output messages about to be sent in the console with tap()
 // TODO Keep clients in sync by using share()

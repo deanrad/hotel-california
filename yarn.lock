@@ -413,6 +413,13 @@ finalhandler@1.1.1:
     statuses "~1.4.0"
     unpipe "~1.0.0"
 
+find-exec@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/find-exec/-/find-exec-1.0.0.tgz#65249cd524de08050531d9d0b84ad2ee1ab727c9"
+  integrity sha1-ZSSc1STeCAUFMdnQuErS7hq3J8k=
+  dependencies:
+    sync-exec "^0.6.2"
+
 find-up@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/find-up/-/find-up-3.0.0.tgz#49169f1d7993430646da61ecc5ae355c21c97b73"
@@ -791,6 +798,13 @@ pify@^3.0.0:
   resolved "https://registry.yarnpkg.com/pify/-/pify-3.0.0.tgz#e5a4acd2c101fdf3d9a4d07f0dbc4db49dd28176"
   integrity sha1-5aSs0sEB/fPZpNB/DbxNtJ3SgXY=
 
+play-sound@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/play-sound/-/play-sound-1.1.2.tgz#aaca3047692af571c0d3a9dc475a5fa7c21322c5"
+  integrity sha1-qsowR2kq9XHA06ncR1pfp8ITIsU=
+  dependencies:
+    find-exec "1.0.0"
+
 proxy-addr@~2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/proxy-addr/-/proxy-addr-2.0.3.tgz#355f262505a621646b3130a728eb647e22055341"
@@ -1082,6 +1096,11 @@ symbol-observable@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.2.0.tgz#c22688aed4eab3cdc2dfeacbb561660560a00804"
   integrity sha512-e900nM8RRtGhlV36KGEU9k65K3mPb1WV70OdjfxlG2EAuM1noi/E/BaW/uMhL7bPEssK8QV57vN3esixjUvcXQ==
+
+sync-exec@^0.6.2:
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/sync-exec/-/sync-exec-0.6.2.tgz#717d22cc53f0ce1def5594362f3a89a2ebb91105"
+  integrity sha1-cX0izFPwzh3vVZQ2LzqJouu5EQU=
 
 to-array@0.1.4:
   version "0.1.4"
