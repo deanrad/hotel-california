@@ -2,9 +2,8 @@ const express = require("express");
 const path = require("path");
 const morgan = require("morgan");
 
-const { interval } = require("rxjs");
+const { interval, empty } = require("rxjs");
 const { map } = require("rxjs/operators");
-require("rxjs-compat");
 const app = express();
 const http = require("http").Server(app);
 const port = process.env.PORT || 8470;
@@ -118,16 +117,18 @@ io.on("connection", client => {
 });
 
 // TODO connect an Observable of simulted occupancy changes to each new client
-const simulatedOccupancyChanges = interval(5000)
-  .map(i => i % 2 === 1)
-  .map(hold => ({
-    type: "setOccupancy",
-    payload: {
-      num: "20",
-      occupancy: hold ? "hold" : "open"
-    }
-  }))
-  .share();
+const simulatedOccupancyChanges = process.env.NO_DEMO
+  ? empty()
+  : interval(5000)
+      .map(i => i % 2 === 1)
+      .map(hold => ({
+        type: "setOccupancy",
+        payload: {
+          num: "20",
+          occupancy: hold ? "hold" : "open"
+        }
+      }))
+      .share();
 
 // TODO Output messages about to be sent in the console with tap()
 // TODO Keep clients in sync by using share()
