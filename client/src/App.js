@@ -85,7 +85,7 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Select store={store} />
+        <Select store={store} process={action => agent.process(action)} />
       </div>
     );
   }

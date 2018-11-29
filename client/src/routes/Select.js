@@ -1,7 +1,6 @@
 import React from "react";
 import RoomView from "../RoomView";
 import { connect } from "react-redux";
-import { process } from "../agent";
 
 export const chunkIntoFloors = roomViews => {
   const floors = [];
@@ -26,7 +25,7 @@ export const mapStateToProps = state => {
   return { floors };
 };
 
-export const Floor = ({ mini, children: rooms }) => (
+export const Floor = ({ mini, children: rooms, process }) => (
   <div className="floor">
     {rooms.map(room => (
       <RoomView
@@ -39,14 +38,16 @@ export const Floor = ({ mini, children: rooms }) => (
     ))}
   </div>
 );
-const Select = ({ floors }) => {
+const Select = ({ floors, process }) => {
   return (
     <div>
       <h2>Welcome to the Hotel California !</h2>
       <h3>Pick a room:</h3>
       <div className="hotel">
         {floors.map((floor, idx) => (
-          <Floor key={idx}>{floor}</Floor>
+          <Floor key={idx} process={process}>
+            {floor}
+          </Floor>
         ))}
       </div>
       <p style={{ position: "fixed", right: 0, top: 0, margin: 20 }}>
