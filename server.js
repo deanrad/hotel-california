@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");
 const morgan = require("morgan");
+const player = require("play-sound")();
 
 const { interval, merge, from } = require("rxjs");
 const { map, tap, share } = require("rxjs/operators");
@@ -77,6 +78,11 @@ http.listen(port, () => console.log(`Server listening on port ${port}`));
 // to FSAs of type setOccupancy (which will be sent out to clients)
 const agent = new Agent();
 agent.addFilter(({ action }) => store.dispatch(action));
+agent.on("holdRoom", ({ action }) => {
+  if (process.env.NO_SOUND) return;
+  if (!action.payload.hold) return;
+  player.play("hotelCalifClip.wav");
+});
 
 const roomHoldOccupancyChanges = agent.allOfType("holdRoom").pipe(
   map(action => ({
