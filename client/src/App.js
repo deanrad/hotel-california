@@ -5,7 +5,10 @@ import "./App.css";
 import Select from "./routes/Select";
 import { store } from "./store";
 import {} from "rxjs";
-import {} from "rxjs/operators";
+import { map } from "rxjs/operators";
+import { Agent, ajaxStreamingGet } from "antares-protocol";
+
+const agent = new Agent();
 
 const url =
   process.NODE_ENV === "production"
@@ -48,11 +51,15 @@ class App extends Component {
 
     // TODO For the Observable of results from the /api/occupancy REST endpoint,
     // send each to the agent in an action of type `setOccupancy`
-    this.callApi("/api/occupancy").then(records => {
-      records.forEach(record =>
-        store.dispatch({ type: "setOccupancy", payload: record })
-      );
-    });
+
+    const restOccupancy = ajaxStreamingGet({ url: "/api/occupancy" }).pipe(
+      map(occupancy => ({
+        type: "setOccupancy",
+        payload: occupancy
+      }))
+    );
+
+    agent.subscribe(restOccupancy);
   }
 
   callApi = async url => {
