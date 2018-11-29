@@ -139,3 +139,4 @@ var simulatedOccupancyChanges = interval(5000).pipe(
   // TODO Keep clients in sync by using share()
   share()
 );
+agent.subscribe(simulatedOccupancyChanges);
