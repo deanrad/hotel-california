@@ -9,6 +9,7 @@ import { map } from "rxjs/operators";
 import { Agent, ajaxStreamingGet } from "antares-protocol";
 
 const agent = new Agent();
+agent.addFilter(({ action }) => store.dispatch(action));
 
 const url =
   process.NODE_ENV === "production"
