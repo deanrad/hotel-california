@@ -97,6 +97,9 @@ io.on("connection", client => {
   });
 
   // TODO "holdRoom" types of client actions are ones we went to process
+  client.on("holdRoom", ({ num, hold }) => {
+    console.log("Recv: holdRoom, " + JSON.stringify({ num, hold }));
+  });
   // through our own agent/store so new clients get the current state
 
   // Be sure and clean up our resources when done
