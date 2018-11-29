@@ -84,7 +84,8 @@ agent.on("holdRoom", ({ action }) => {
   const occupancy = hold ? "hold" : "open";
 
   // console.log("Setting num: ", num, JSON.stringify({ $set: { occupancy } }));
-  Room.updateOne({ num }, { $set: { occupancy } });
+  const log = msg => console.log(msg);
+  Room.updateOne({ num }, { $set: { occupancy } }).then(log, log);
 });
 
 const roomHoldOccupancyChanges = agent.actionsOfType("holdRoom").pipe(
@@ -153,3 +154,18 @@ agent.subscribe(simulatedOccupancyChanges);
 for (let { num, occupancy } of createRoomViews(initialState)) {
   Room.findOrCreate({ num }, { occupancy });
 }
+
+// TODO Upon startup, load the store up with room and occupancy data
+Room.find({}).then(rooms => {
+  agent.process({
+    type: "loadRooms",
+    payload: rooms
+  });
+
+  rooms.map(({ num, occupancy }) => {
+    agent.process({
+      type: "setOccupancy",
+      payload: { num, occupancy }
+    });
+  });
+});
