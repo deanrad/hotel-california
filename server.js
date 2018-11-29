@@ -84,11 +84,13 @@ agent.on("holdRoom", ({ action }) => {
   if (process.env.NO_SOUND || !action.payload.hold) return;
 
   return new Observable(notify => {
-    player.play("hotelCalifClip.wav", () => {
+    const audio = player.play("hotelCalifClip.wav", () => {
       notify.complete()
     });
+
+    return () => audio.kill()
   })
-}, { concurrency: "serial"});
+}, { concurrency: "cutoff"});
 
 const roomHoldOccupancyChanges = agent.allOfType("holdRoom").pipe(
   map(action => ({
