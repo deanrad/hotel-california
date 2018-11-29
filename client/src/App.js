@@ -4,7 +4,7 @@ import io from "socket.io-client";
 import "./App.css";
 import Select from "./routes/Select";
 import { store } from "./store";
-import {} from "rxjs";
+import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { Agent, ajaxStreamingGet } from "antares-protocol";
 
@@ -20,6 +20,16 @@ const socket = io(url);
 socket.on("hello", () => {
   console.log({ type: "socket.connect" });
 });
+
+// TODO Represent all "setOccupancy" WebSocket messages as an
+// Observable that emits FSAs of type "setOccupancy".
+const socketOccupancies = new Observable(notify => {
+  socket.on("setOccupancy", payload => {
+    notify.next(payload);
+  });
+}).pipe(map(payload => ({ type: "setOccupancy", payload })));
+
+agent.subscribe(socketOccupancies);
 
 // TODO When any component processes a holdRoom action, forward it via the WS.
 
