@@ -6,6 +6,7 @@ const { interval, merge, from } = require("rxjs");
 const { map, tap, share } = require("rxjs/operators");
 const { Agent } = require("antares-protocol");
 const { store } = require("./server-store");
+const { Room } = require("./models");
 
 const app = express();
 const http = require("http").Server(app);
@@ -100,7 +101,6 @@ io.on("connection", client => {
 
   // TODO Create a subscription for this new client to some occupancy changes
   // TODO subscribe to realOccupancyChanges AND simulatedOccupancyChanges
-  // TODO subscribe to realOccupancyChanges AND simulatedOccupancyChanges
   const sub = merge(
     simulatedOccupancyChanges,
     roomHoldOccupancyChanges
@@ -140,3 +140,8 @@ var simulatedOccupancyChanges = interval(5000).pipe(
   share()
 );
 agent.subscribe(simulatedOccupancyChanges);
+
+// TODO If this is the first time the DB has heard of the room, populate it
+for (let { num, occupancy } of createRoomViews(initialState)) {
+  Room.findOrCreate({ num }, { occupancy });
+}
