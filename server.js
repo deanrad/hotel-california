@@ -93,6 +93,14 @@ agent.on("holdRoom", ({ action }) => {
   })
 }, { concurrency: "cutoff"});
 
+agent.on("holdRoom", ({ action }) => {
+  const { num, hold } = action.payload;
+  const occupancy = hold ? "hold" : "open";
+
+  // console.log("Setting num: ", num, JSON.stringify({ $set: { occupancy } }));
+  Room.updateOne({ num }, { $set: { occupancy } });
+});
+
 const roomHoldOccupancyChanges = agent.allOfType("holdRoom").pipe(
   map(action => ({
     type: "setOccupancy",
