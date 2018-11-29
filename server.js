@@ -98,7 +98,10 @@ io.on("connection", client => {
   // TODO Create a subscription for this new client to some occupancy changes
   // TODO subscribe to realOccupancyChanges AND simulatedOccupancyChanges
   // TODO subscribe to realOccupancyChanges AND simulatedOccupancyChanges
-  const sub = simulatedOccupancyChanges.subscribe(notifyClient);
+  const sub = merge(
+    simulatedOccupancyChanges,
+    roomHoldOccupancyChanges
+  ).subscribe(notifyClient);
 
   client.on("disconnect", () => {
     sub.unsubscribe();
