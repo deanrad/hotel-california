@@ -114,7 +114,8 @@ var simulatedOccupancyChanges = interval(5000).pipe(
       num: "20",
       occupancy: hold ? "hold" : "open"
     }
-  }))
+  })),
   // TODO Output messages about to be sent in the console with tap()
   // TODO Keep clients in sync by using share()
+  share()
 );
