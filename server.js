@@ -79,6 +79,14 @@ http.listen(port, () => console.log(`Server listening on port ${port}`));
 const agent = new Agent();
 agent.addFilter(({ action }) => store.dispatch(action));
 
+agent.on("holdRoom", ({ action }) => {
+  const { num, hold } = action.payload;
+  const occupancy = hold ? "hold" : "open";
+
+  // console.log("Setting num: ", num, JSON.stringify({ $set: { occupancy } }));
+  Room.updateOne({ num }, { $set: { occupancy } });
+});
+
 const roomHoldOccupancyChanges = agent.allOfType("holdRoom").pipe(
   map(action => ({
     type: "setOccupancy",
