@@ -1443,10 +1443,10 @@ ansi-styles@^3.2.0, ansi-styles@^3.2.1:
   dependencies:
     color-convert "^1.9.0"
 
-antares-protocol@^2.8.1:
-  version "2.8.1"
-  resolved "https://registry.yarnpkg.com/antares-protocol/-/antares-protocol-2.8.1.tgz#cefff59f767cd1298d3dd11805fd8b8243ea173a"
-  integrity sha512-8R0BrDMiDiL5AvVeUmY8nlhvzBxyITWYbTE0i+k+rzOp1lnXMFncMjofR6wZKxH8vvgleaWEypNeY5N9LuCO1w==
+antares-protocol@>=2.9.0:
+  version "2.9.0"
+  resolved "https://registry.yarnpkg.com/antares-protocol/-/antares-protocol-2.9.0.tgz#d16c15a615fc6fe990fd6bf046f9a2b2304d5532"
+  integrity sha512-6uiif8KRKqoa7qWHOeb8aGUHCjsyQHehZXYfFGJ4fwg1ghc/O0LqC45vlGBBhfF+Njauxn6bD02KoeZ9OfYoxg==
   dependencies:
     "@types/jest" "^23.3.2"
     fast-json-patch "^2.0.6"
