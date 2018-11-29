@@ -88,6 +88,13 @@ io.on("connection", client => {
 
   // TODO Create a subscription for this new client to some occupancy changes
   // TODO subscribe to realOccupancyChanges AND simulatedOccupancyChanges
+  // TODO subscribe to realOccupancyChanges AND simulatedOccupancyChanges
+  const sub = simulatedOccupancyChanges.subscribe(notifyClient);
+
+  client.on("disconnect", () => {
+    sub.unsubscribe();
+    console.log("Client disconnected");
+  });
 
   // TODO "holdRoom" types of client actions are ones we went to process
   // through our own agent/store so new clients get the current state
