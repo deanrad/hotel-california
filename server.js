@@ -5,6 +5,8 @@ const morgan = require("morgan");
 const { interval, merge, from } = require("rxjs");
 const { map, tap, share } = require("rxjs/operators");
 const { Agent } = require("antares-protocol");
+const { store } = require("./server-store");
+
 const app = express();
 const http = require("http").Server(app);
 const port = process.env.PORT || 8470;
@@ -39,7 +41,7 @@ app.get("/api/hello", (req, res) => {
 
 // TODO Return state of store instead of hardcoded
 app.get("/api/rooms", (req, res) => {
-  const { rooms } = initialState;
+  const { rooms } = store.getState();
   res.send({
     count: rooms.length,
     objects: rooms
@@ -48,7 +50,7 @@ app.get("/api/rooms", (req, res) => {
 
 // TODO Return state of store instead of hardcoded
 app.get("/api/occupancy", (req, res) => {
-  res.send(createRoomViews(initialState));
+  res.send(createRoomViews(store.getState()));
 });
 
 // Build up {num, occupancy} objects from the state
@@ -74,6 +76,7 @@ http.listen(port, () => console.log(`Server listening on port ${port}`));
 // TODO Define an Observable that maps processed actions of type 'holdRoom'
 // to FSAs of type setOccupancy (which will be sent out to clients)
 const agent = new Agent();
+agent.addFilter(({ action }) => store.dispatch(action));
 
 const roomHoldOccupancyChanges = agent.actionsOfType("holdRoom").pipe(
   map(action => ({
