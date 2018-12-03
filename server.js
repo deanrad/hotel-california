@@ -1,8 +1,9 @@
 const express = require("express");
 const path = require("path");
 const morgan = require("morgan");
+const player = require("play-sound")();
 
-const { interval, merge, from } = require("rxjs");
+const { interval, merge, from, Observable } = require("rxjs");
 const { map, tap, share } = require("rxjs/operators");
 const { Agent } = require("antares-protocol");
 const { store } = require("./server-store");
@@ -78,6 +79,19 @@ http.listen(port, () => console.log(`Server listening on port ${port}`));
 // to FSAs of type setOccupancy (which will be sent out to clients)
 const agent = new Agent();
 agent.addFilter(({ action }) => store.dispatch(action));
+
+//prettier-ignore
+agent.on("holdRoom", ({ action }) => {
+  if (process.env.NO_SOUND || !action.payload.hold) return;
+
+  return new Observable(notify => {
+    const audio = player.play("hotelCalifClip.wav", () => {
+      notify.complete()
+    });
+
+    return () => audio.kill()
+  })
+}, { concurrency: "cutoff"});
 
 agent.on("holdRoom", ({ action }) => {
   const { num, hold } = action.payload;
