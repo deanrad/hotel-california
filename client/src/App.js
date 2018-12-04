@@ -51,11 +51,20 @@ if (document.location.hash === "#demo") {
 // TODO Return an Observable of the objects we recieve
 // in the callbacks of: socket.on("setOccupancy", ...)
 
+const callApi = async url => {
+  const response = await fetch(url);
+  const body = await response.json();
+
+  if (response.status !== 200) throw Error(body.message);
+
+  return body;
+};
+
 class App extends Component {
   componentDidMount() {
     // TODO With the objects field of the /api/rooms GET result
     // send it to the agent, not store, in an action of type `loadRooms`
-    this.callApi("/api/rooms")
+    callApi("/api/rooms")
       .then(({ objects }) => {
         store.dispatch({ type: "loadRooms", payload: objects });
       })
@@ -74,14 +83,6 @@ class App extends Component {
     agent.subscribe(restOccupancy);
   }
 
-  callApi = async url => {
-    const response = await fetch(url);
-    const body = await response.json();
-
-    if (response.status !== 200) throw Error(body.message);
-
-    return body;
-  };
 
   render() {
     return (
