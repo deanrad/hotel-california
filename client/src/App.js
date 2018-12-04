@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import io from "socket.io-client";
 
 import "./App.css";
@@ -7,7 +7,8 @@ import { store } from "./store";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { Agent, ajaxStreamingGet } from "antares-protocol";
-
+import oboe from "oboe";
+Object.assign(window, { oboe });
 const agent = new Agent();
 
 const url =
@@ -16,80 +17,45 @@ const url =
     : "http://localhost:8470";
 
 const socket = io(url);
-socket.on("hello", () => {
-  console.log({ type: "socket.connect" });
-});
 
-// TODO Represent all "setOccupancy" WebSocket messages as an
-// Observable that emits FSAs of type "setOccupancy".
+// Agent Configuration
+// All action types (the two we care about are holdRoom and setOccupancy)
+agent.addFilter(({ action }) => store.dispatch(action));
+agent.on("holdRoom", ({ action }) => socket.emit("holdRoom", action.payload));
+
+// Set up our agent to be populated from REST calls and WS occupancies
+const restRooms = ajaxStreamingGet({
+  url: "/api/rooms",
+  expandKey: "objects"
+}).pipe(map(rooms => ({ type: "loadRooms", payload: rooms })));
+
+const restOccupancy = ajaxStreamingGet({
+  url: "/api/occupancy",
+  expandKey: "$*"
+}).pipe(
+  map(occupancy => ({
+    type: "setOccupancy",
+    payload: occupancy
+  }))
+);
+
 const socketOccupancies = new Observable(notify => {
   socket.on("setOccupancy", payload => {
     notify.next(payload);
   });
 }).pipe(map(payload => ({ type: "setOccupancy", payload })));
 
-agent.addFilter(({ action }) => store.dispatch(action));
-agent.on("holdRoom", ({ action }) => socket.emit("holdRoom", action.payload));
+agent.subscribe(restRooms);
+agent.subscribe(restOccupancy);
 agent.subscribe(socketOccupancies);
 
-// TODO When any component processes a holdRoom action, forward it via the WS.
-
-// TODO After 3 seconds, release a hold on a room
-
-// TODO every 5 seconds Hold a random room
-// TODO cancel upon the first click on the document
-if (document.location.hash === "#demo") {
-  console.log("entering demo mode");
-  const firstClick = new Promise(resolve =>
-    document.addEventListener("click", resolve)
-  );
-  firstClick.then(() => {
-    console.log("canceled demo mode");
-  });
-}
-
-// TODO Return an Observable of the objects we recieve
-// in the callbacks of: socket.on("setOccupancy", ...)
-
-class App extends Component {
-  componentDidMount() {
-    // TODO With the objects field of the /api/rooms GET result
-    // send it to the agent, not store, in an action of type `loadRooms`
-    this.callApi("/api/rooms")
-      .then(({ objects }) => {
-        store.dispatch({ type: "loadRooms", payload: objects });
-      })
-      .catch(err => console.log(err));
-
-    // TODO For the Observable of results from the /api/occupancy REST endpoint,
-    // send each to the agent in an action of type `setOccupancy`
-
-    const restOccupancy = ajaxStreamingGet({ url: "/api/occupancy" }).pipe(
-      map(occupancy => ({
-        type: "setOccupancy",
-        payload: occupancy
-      }))
-    );
-
-    agent.subscribe(restOccupancy);
-  }
-
-  callApi = async url => {
-    const response = await fetch(url);
-    const body = await response.json();
-
-    if (response.status !== 200) throw Error(body.message);
-
-    return body;
-  };
-
-  render() {
-    return (
-      <div className="App">
-        <Select store={store} process={action => agent.process(action)} />
-      </div>
-    );
-  }
-}
+// Export the App as a functional component whose state is
+// entirely derived from the store. Give it access to a
+// `process` method by which to send actions to the agent.
+const App = () => (
+  <div className="App">
+    <Select store={store} process={action => agent.process(action)} />
+  </div>
+);
 
 export default App;
