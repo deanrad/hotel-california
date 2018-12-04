@@ -17,39 +17,13 @@ const url =
     : "http://localhost:8470";
 
 const socket = io(url);
-socket.on("hello", () => {
-  console.log({ type: "socket.connect" });
-});
 
-// TODO Represent all "setOccupancy" WebSocket messages as an
-// Observable that emits FSAs of type "setOccupancy".
-const socketOccupancies = new Observable(notify => {
-  socket.on("setOccupancy", payload => {
-    notify.next(payload);
-  });
-}).pipe(map(payload => ({ type: "setOccupancy", payload })));
-
+// Agent Configuration
+// All action types (the two we care about are holdRoom and setOccupancy)
 agent.addFilter(({ action }) => store.dispatch(action));
 agent.on("holdRoom", ({ action }) => socket.emit("holdRoom", action.payload));
-agent.subscribe(socketOccupancies);
 
-// TODO When any component processes a holdRoom action, forward it via the WS.
-
-// TODO After 3 seconds, release a hold on a room
-
-// TODO every 5 seconds Hold a random room
-// TODO cancel upon the first click on the document
-if (document.location.hash === "#demo") {
-  console.log("entering demo mode");
-  const firstClick = new Promise(resolve =>
-    document.addEventListener("click", resolve)
-  );
-  firstClick.then(() => {
-    console.log("canceled demo mode");
-  });
-}
-
-// Set up our agent to be populated from both REST calls.
+// Set up our agent to be populated from REST calls and WS occupancies
 const restRooms = ajaxStreamingGet({
   url: "/api/rooms",
   expandKey: "objects"
@@ -65,12 +39,19 @@ const restOccupancy = ajaxStreamingGet({
   }))
 );
 
+const socketOccupancies = new Observable(notify => {
+  socket.on("setOccupancy", payload => {
+    notify.next(payload);
+  });
+}).pipe(map(payload => ({ type: "setOccupancy", payload })));
+
 agent.subscribe(restRooms);
 agent.subscribe(restOccupancy);
+agent.subscribe(socketOccupancies);
 
-// TODO Return an Observable of the objects we recieve
-// in the callbacks of: socket.on("setOccupancy", ...)
-
+// Export the App as a functional component whose state is
+// entirely derived from the store. Give it access to a
+// `process` method by which to send actions to the agent.
 const App = () => (
   <div className="App">
     <Select store={store} process={action => agent.process(action)} />
