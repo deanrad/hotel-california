@@ -7,7 +7,8 @@ import { store } from "./store";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { Agent, ajaxStreamingGet } from "antares-protocol";
-
+import oboe from "oboe";
+Object.assign(window, { oboe });
 const agent = new Agent();
 
 const url =
@@ -51,29 +52,22 @@ if (document.location.hash === "#demo") {
 // TODO Return an Observable of the objects we recieve
 // in the callbacks of: socket.on("setOccupancy", ...)
 
-const callApi = async url => {
-  const response = await fetch(url);
-  const body = await response.json();
-
-  if (response.status !== 200) throw Error(body.message);
-
-  return body;
-};
-
 class App extends Component {
   componentDidMount() {
-    // TODO With the objects field of the /api/rooms GET result
-    // send it to the agent, not store, in an action of type `loadRooms`
-    callApi("/api/rooms")
-      .then(({ objects }) => {
-        store.dispatch({ type: "loadRooms", payload: objects });
-      })
-      .catch(err => console.log(err));
+    const restRooms = ajaxStreamingGet({
+      url: "/api/rooms",
+      expandKey: "objects"
+    }).pipe(map(rooms => ({ type: "loadRooms", payload: rooms })));
+
+    agent.subscribe(restRooms);
 
     // TODO For the Observable of results from the /api/occupancy REST endpoint,
     // send each to the agent in an action of type `setOccupancy`
 
-    const restOccupancy = ajaxStreamingGet({ url: "/api/occupancy" }).pipe(
+    const restOccupancy = ajaxStreamingGet({
+      url: "/api/occupancy",
+      expandKey: "$*"
+    }).pipe(
       map(occupancy => ({
         type: "setOccupancy",
         payload: occupancy
@@ -82,7 +76,6 @@ class App extends Component {
 
     agent.subscribe(restOccupancy);
   }
-
 
   render() {
     return (
