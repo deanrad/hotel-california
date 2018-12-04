@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import io from "socket.io-client";
 
 import "./App.css";
@@ -49,41 +49,32 @@ if (document.location.hash === "#demo") {
   });
 }
 
+// Set up our agent to be populated from both REST calls.
+const restRooms = ajaxStreamingGet({
+  url: "/api/rooms",
+  expandKey: "objects"
+}).pipe(map(rooms => ({ type: "loadRooms", payload: rooms })));
+
+const restOccupancy = ajaxStreamingGet({
+  url: "/api/occupancy",
+  expandKey: "$*"
+}).pipe(
+  map(occupancy => ({
+    type: "setOccupancy",
+    payload: occupancy
+  }))
+);
+
+agent.subscribe(restRooms);
+agent.subscribe(restOccupancy);
+
 // TODO Return an Observable of the objects we recieve
 // in the callbacks of: socket.on("setOccupancy", ...)
 
-class App extends Component {
-  componentDidMount() {
-    const restRooms = ajaxStreamingGet({
-      url: "/api/rooms",
-      expandKey: "objects"
-    }).pipe(map(rooms => ({ type: "loadRooms", payload: rooms })));
-
-    agent.subscribe(restRooms);
-
-    // TODO For the Observable of results from the /api/occupancy REST endpoint,
-    // send each to the agent in an action of type `setOccupancy`
-
-    const restOccupancy = ajaxStreamingGet({
-      url: "/api/occupancy",
-      expandKey: "$*"
-    }).pipe(
-      map(occupancy => ({
-        type: "setOccupancy",
-        payload: occupancy
-      }))
-    );
-
-    agent.subscribe(restOccupancy);
-  }
-
-  render() {
-    return (
-      <div className="App">
-        <Select store={store} process={action => agent.process(action)} />
-      </div>
-    );
-  }
-}
+const App = () => (
+  <div className="App">
+    <Select store={store} process={action => agent.process(action)} />
+  </div>
+);
 
 export default App;
