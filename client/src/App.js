@@ -4,8 +4,10 @@ import io from "socket.io-client";
 import "./App.css";
 import Select from "./routes/Select";
 import { store } from "./store";
-import {} from "rxjs";
-import {} from "rxjs/operators";
+import { process, agent } from "./agent";
+import { ajaxStreamingGet } from "antares-protocol";
+import { Observable, interval } from "rxjs";
+import { map } from "rxjs/operators";
 
 const url =
   process.NODE_ENV === "production"
@@ -15,6 +17,17 @@ const url =
 const socket = io(url);
 socket.on("hello", () => {
   console.log({ type: "socket.connect" });
+});
+
+// TODO A consequence of us seeing a "holdRoom" action is
+// we will put it on the socket to the server
+agent.on("holdRoom", ({ action }) => socket.emit("holdRoom", action.payload));
+
+// TODO Create an Observable of WS setOccupancy payloads
+const socketOccupancies = new Observable(notify => {
+  socket.on("setOccupancy", payload => {
+    process({ type: "setOccupancy", payload });
+  });
 });
 
 // TODO When any component processes a holdRoom action, forward it via the WS.
@@ -28,7 +41,22 @@ if (document.location.hash === "#demo") {
   const firstClick = new Promise(resolve =>
     document.addEventListener("click", resolve)
   );
+
+  const rooms = ["10", "11", "20", "21", "30", "31"];
+  const sub = interval(3000)
+    .pipe(
+      map(() => ({
+        type: "holdRoom",
+        payload: {
+          hold: true,
+          num: rooms[Math.floor(Math.random() * 6)]
+        }
+      }))
+    )
+    .subscribe(action => process(action));
+
   firstClick.then(() => {
+    sub.unsubscribe();
     console.log("canceled demo mode");
   });
 }
@@ -42,17 +70,17 @@ class App extends Component {
     // send it to the agent, not store, in an action of type `loadRooms`
     this.callApi("/api/rooms")
       .then(({ objects }) => {
-        store.dispatch({ type: "loadRooms", payload: objects });
+        process({ type: "loadRooms", payload: objects });
       })
       .catch(err => console.log(err));
 
-    // TODO For the Observable of results from the /api/occupancy REST endpoint,
+    // TODO 1) For the Observable of results from the /api/occupancy REST endpoint,
     // send each to the agent in an action of type `setOccupancy`
-    this.callApi("/api/occupancy").then(records => {
-      records.forEach(record =>
-        store.dispatch({ type: "setOccupancy", payload: record })
-      );
-    });
+    ajaxStreamingGet({ url: "/api/occupancy" }).subscribe(record =>
+      process({ type: "setOccupancy", payload: record })
+    );
+
+    socketOccupancies.subscribe();
   }
 
   callApi = async url => {
