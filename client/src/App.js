@@ -9,7 +9,6 @@ import { map } from "rxjs/operators";
 import { Agent, ajaxStreamingGet } from "antares-protocol";
 
 const agent = new Agent();
-agent.addFilter(({ action }) => store.dispatch(action));
 
 const url =
   process.NODE_ENV === "production"
@@ -29,6 +28,8 @@ const socketOccupancies = new Observable(notify => {
   });
 }).pipe(map(payload => ({ type: "setOccupancy", payload })));
 
+agent.addFilter(({ action }) => store.dispatch(action));
+agent.on("holdRoom", ({ action }) => socket.emit("holdRoom", action.payload));
 agent.subscribe(socketOccupancies);
 
 // TODO When any component processes a holdRoom action, forward it via the WS.
@@ -85,7 +86,7 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Select store={store} />
+        <Select store={store} process={action => agent.process(action)} />
       </div>
     );
   }
