@@ -4,8 +4,11 @@ import io from "socket.io-client";
 import "./App.css";
 import Select from "./routes/Select";
 import { store } from "./store";
-import {} from "rxjs";
-import {} from "rxjs/operators";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+import { Agent, ajaxStreamingGet } from "antares-protocol";
+
+const agent = new Agent();
 
 const url =
   process.NODE_ENV === "production"
@@ -16,6 +19,18 @@ const socket = io(url);
 socket.on("hello", () => {
   console.log({ type: "socket.connect" });
 });
+
+// TODO Represent all "setOccupancy" WebSocket messages as an
+// Observable that emits FSAs of type "setOccupancy".
+const socketOccupancies = new Observable(notify => {
+  socket.on("setOccupancy", payload => {
+    notify.next(payload);
+  });
+}).pipe(map(payload => ({ type: "setOccupancy", payload })));
+
+agent.addFilter(({ action }) => store.dispatch(action));
+agent.on("holdRoom", ({ action }) => socket.emit("holdRoom", action.payload));
+agent.subscribe(socketOccupancies);
 
 // TODO When any component processes a holdRoom action, forward it via the WS.
 
@@ -48,11 +63,15 @@ class App extends Component {
 
     // TODO For the Observable of results from the /api/occupancy REST endpoint,
     // send each to the agent in an action of type `setOccupancy`
-    this.callApi("/api/occupancy").then(records => {
-      records.forEach(record =>
-        store.dispatch({ type: "setOccupancy", payload: record })
-      );
-    });
+
+    const restOccupancy = ajaxStreamingGet({ url: "/api/occupancy" }).pipe(
+      map(occupancy => ({
+        type: "setOccupancy",
+        payload: occupancy
+      }))
+    );
+
+    agent.subscribe(restOccupancy);
   }
 
   callApi = async url => {
@@ -67,7 +86,7 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Select store={store} />
+        <Select store={store} process={action => agent.process(action)} />
       </div>
     );
   }

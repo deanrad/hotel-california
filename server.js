@@ -4,6 +4,10 @@ const morgan = require("morgan");
 
 const { interval, merge, from } = require("rxjs");
 const { map, tap, share } = require("rxjs/operators");
+const { Agent } = require("antares-protocol");
+const { store } = require("./server-store");
+const { Room } = require("./models");
+
 const app = express();
 const http = require("http").Server(app);
 const port = process.env.PORT || 8470;
@@ -38,7 +42,7 @@ app.get("/api/hello", (req, res) => {
 
 // TODO Return state of store instead of hardcoded
 app.get("/api/rooms", (req, res) => {
-  const { rooms } = initialState;
+  const { rooms } = store.getState();
   res.send({
     count: rooms.length,
     objects: rooms
@@ -47,7 +51,7 @@ app.get("/api/rooms", (req, res) => {
 
 // TODO Return state of store instead of hardcoded
 app.get("/api/occupancy", (req, res) => {
-  res.send(createRoomViews(initialState));
+  res.send(createRoomViews(store.getState()));
 });
 
 // Build up {num, occupancy} objects from the state
@@ -72,9 +76,27 @@ http.listen(port, () => console.log(`Server listening on port ${port}`));
 
 // TODO Define an Observable that maps processed actions of type 'holdRoom'
 // to FSAs of type setOccupancy (which will be sent out to clients)
+const agent = new Agent();
+agent.addFilter(({ action }) => store.dispatch(action));
 
-// TODO Process holdRoom actions through the store so new clients
-// will get the actual state. Later, we'll persist the change in the db
+agent.on("holdRoom", ({ action }) => {
+  const { num, hold } = action.payload;
+  const occupancy = hold ? "hold" : "open";
+
+  // console.log("Setting num: ", num, JSON.stringify({ $set: { occupancy } }));
+  const log = msg => console.log(msg);
+  Room.updateOne({ num }, { $set: { occupancy } }).then(log, log);
+});
+
+const roomHoldOccupancyChanges = agent.actionsOfType("holdRoom").pipe(
+  map(action => ({
+    type: "setOccupancy",
+    payload: {
+      num: action.payload.num,
+      occupancy: action.payload.hold ? "hold" : "open"
+    }
+  }))
+);
 
 // ------------ WebSocket stuff follows -------------------- //
 const io = require("socket.io").listen(http);
@@ -88,8 +110,22 @@ io.on("connection", client => {
 
   // TODO Create a subscription for this new client to some occupancy changes
   // TODO subscribe to realOccupancyChanges AND simulatedOccupancyChanges
+  const sub = merge(
+    simulatedOccupancyChanges,
+    roomHoldOccupancyChanges
+  ).subscribe(notifyClient);
 
-  // TODO "holdRoom" types of client actions are ones we went to process
+  client.on("disconnect", () => {
+    sub.unsubscribe();
+    console.log("Client disconnected");
+  });
+
+  // TODO Process holdRoom actions through the store so new clients
+  // will get the actual state. Later, we'll persist the change in the db
+  client.on("holdRoom", ({ num, hold }) => {
+    console.log("Recv: holdRoom, " + JSON.stringify({ num, hold }));
+    agent.process({ type: "holdRoom", payload: { num, hold } });
+  });
   // through our own agent/store so new clients get the current state
 
   // Be sure and clean up our resources when done
@@ -107,7 +143,29 @@ var simulatedOccupancyChanges = interval(5000).pipe(
       num: "20",
       occupancy: hold ? "hold" : "open"
     }
-  }))
+  })),
   // TODO Output messages about to be sent in the console with tap()
   // TODO Keep clients in sync by using share()
+  share()
 );
+agent.subscribe(simulatedOccupancyChanges);
+
+// TODO If this is the first time the DB has heard of the room, populate it
+for (let { num, occupancy } of createRoomViews(initialState)) {
+  Room.findOrCreate({ num }, { occupancy });
+}
+
+// TODO Upon startup, load the store up with room and occupancy data
+Room.find({}).then(rooms => {
+  agent.process({
+    type: "loadRooms",
+    payload: rooms
+  });
+
+  rooms.map(({ num, occupancy }) => {
+    agent.process({
+      type: "setOccupancy",
+      payload: { num, occupancy }
+    });
+  });
+});
