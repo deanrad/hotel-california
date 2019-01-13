@@ -6,6 +6,7 @@ const { interval, merge, from } = require("rxjs");
 const { map, tap, share } = require("rxjs/operators");
 const { Agent } = require("antares-protocol");
 const { store } = require("./server-store");
+const { Room } = require("./models");
 
 const app = express();
 const http = require("http").Server(app);
@@ -78,6 +79,15 @@ http.listen(port, () => console.log(`Server listening on port ${port}`));
 const agent = new Agent();
 agent.addFilter(({ action }) => store.dispatch(action));
 
+agent.on("holdRoom", ({ action }) => {
+  const { num, hold } = action.payload;
+  const occupancy = hold ? "hold" : "open";
+
+  // console.log("Setting num: ", num, JSON.stringify({ $set: { occupancy } }));
+  const log = msg => console.log(msg);
+  Room.updateOne({ num }, { $set: { occupancy } }).then(log, log);
+});
+
 const roomHoldOccupancyChanges = agent.actionsOfType("holdRoom").pipe(
   map(action => ({
     type: "setOccupancy",
@@ -99,7 +109,6 @@ io.on("connection", client => {
   };
 
   // TODO Create a subscription for this new client to some occupancy changes
-  // TODO subscribe to realOccupancyChanges AND simulatedOccupancyChanges
   // TODO subscribe to realOccupancyChanges AND simulatedOccupancyChanges
   const sub = merge(
     simulatedOccupancyChanges,
@@ -140,3 +149,23 @@ var simulatedOccupancyChanges = interval(5000).pipe(
   share()
 );
 agent.subscribe(simulatedOccupancyChanges);
+
+// TODO If this is the first time the DB has heard of the room, populate it
+for (let { num, occupancy } of createRoomViews(initialState)) {
+  Room.findOrCreate({ num }, { occupancy });
+}
+
+// TODO Upon startup, load the store up with room and occupancy data
+Room.find({}).then(rooms => {
+  agent.process({
+    type: "loadRooms",
+    payload: rooms
+  });
+
+  rooms.map(({ num, occupancy }) => {
+    agent.process({
+      type: "setOccupancy",
+      payload: { num, occupancy }
+    });
+  });
+});
